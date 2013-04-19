@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<head>
+  <!-- Spotify CSS files -->
+  <link rel="stylesheet" type="text/css" href="sp://resources/css/eve.css">
+  <link rel="stylesheet" type="text/css" href="sp://resources/css/api.css">
+  <link rel="stylesheet" type="text/css" href="sp://resources/css/player.css">
+  <link rel="stylesheet" type="text/css" href="sp://resources/css/list.css">
+
+  <!-- Project CSS files -->
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/github.css">
+</head>
+<body>
+  <div id="wrapper">
+    <div id="index" class="section">
+      <h2>Rock Tumbler</h2>
+      <div id="drop_box"></div>
+      <hr>
+      <div id="player"></div>
+      <hr>
+      <div id="original-tracks-list"></div>
+      <hr>
+      <div id="played-tracks-list"></div>
+      <script src="/js/underscore/underscore-min.js"></script>
+      <script>
+        var sp = getSpotifyApi();
+        var models = sp.require('$api/models');
+        var views = sp.require("$api/views");
+        var player = models.player;
+
+        var orig_playlist, playlist, played_list, currentTrack, startTrack, original_tracks_list, played_tracks_list, multiple_tracks_player, played_tracks, r;
+
+        var original_tracks_list_HTML = document.getElementById('original-tracks-list');
+        var played_tracks_list_HTML = document.getElementById('played-tracks-list');
+        var multiple_tracks_player_HTML = document.getElementById('player');
+
+        function setupPlaylists(r,playlist,played_list) {
+          _(r).each(function(value){
+            if (_.contains(played_tracks,orig_playlist.get(value).data.uri)) {
+              played_list.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
+            } else {
+              playlist.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
+            }
+          });
+          startTrack = playlist.get(0);
+        }
+
+        function getLocalStorage(orig_playlist) {
+          return localStorage[orig_playlist.name] && localStorage[orig_playlist.name].split(",").length > 0 ? localStorage[orig_playlist.name].split(",") : [];
+        }
+
+        function setupView(playlist,played_list) {
+          original_tracks_list = new views.List(playlist);
+          original_tracks_list.track = playlist.get(0); // Don't play the track right away
+          original_tracks_list.context = playlist;
+
+          played_tracks_list = new views.List(played_list);
+          played_tracks_list.track = null; // Don't play the track right away
+          played_tracks_list.context = played_list;
+
+          original_tracks_list_HTML.innerHTML = '';
+          original_tracks_list_HTML.appendChild(original_tracks_list.node);
+
+          played_tracks_list_HTML.innerHTML = '';
+          played_tracks_list_HTML.appendChild(played_tracks_list.node);
+
+          /* Append a player */
+          multiple_tracks_player = new views.Player();
+          multiple_tracks_player.context = playlist;
+          multiple_tracks_player_HTML.innerHTML = '';
+          multiple_tracks_player_HTML.appendChild(multiple_tracks_player.node);
+
+          playlist.observe(models.EVENT.CHANGE, function(event) {
+            original_tracks_list_HTML.innerHTML = '';
+            original_tracks_list_HTML.appendChild(original_tracks_list.node);
+          });
+
+          playlist.observe(models.EVENT.CHANGE, function(event) {
+            played_tracks_list_HTML.innerHTML = '';
+            played_tracks_list_HTML.appendChild(played_tracks_list.node);
+          });
+
+          models.player.observe(models.EVENT.CHANGE, function(event) {
+            console.log(event);
+            if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
+              currentTrack = startTrack;
+            } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+              playlist.remove(currentTrack);
+              played_list.add(currentTrack);
+
+              if (playlist.length == 0) {
+                localStorage.removeItem(orig_playlist.name);
+                played_tracks = getOrSetLocalStorage(orig_playlist);
+                playlist = new models.Playlist();
+                played_list = new models.Playlist();
+                setupPlaylists(r,playlist,played_list);
+              }
+
+              setupView(playlist,played_list);
+
+            } else if (event.data.curtrack && !event.data.curcontext) {
+              played_tracks.push(currentTrack.data.uri);
+              localStorage[orig_playlist.name] = played_tracks;
+              playlist.remove(currentTrack);
+              played_list.add(currentTrack);
+              currentTrack = player.track;
+            }
+          });
+        }
+
+        function setupDroppedPlaylist(drop) {
+          if (orig_playlist && drop.uri == orig_playlist.uri) {
+            return false;
+          }
+
+          orig_playlist = models.Playlist.fromURI(drop.uri);
+          playlist = new models.Playlist();
+          played_list = new models.Playlist();
+
+          r = _.shuffle(_.range(orig_playlist.length));
+          played_tracks = getLocalStorage(orig_playlist);
+
+          setupPlaylists(r,playlist,played_list);
+
+          setupView(playlist,played_list);
+        }
+
+        // Handle drops
+        var drop_box = document.querySelector('#drop_box');
+
+        drop_box.addEventListener('dragstart', function(e){
+          e.dataTransfer.setData('text/html', this.innerHTML);
+          e.dataTransfer.effectAllowed = 'copy';
+        }, false);
+
+        drop_box.addEventListener('dragenter', function(e){
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          this.classList.add('over');
+        }, false);
+
+        drop_box.addEventListener('dragover', function(e){
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          return false;
+        }, false);
+
+        drop_box.addEventListener('dragleave', function(e){
+          e.preventDefault();
+          this.classList.remove('over');
+        }, false);
+
+        drop_box.addEventListener('drop', function(e){
+          e.preventDefault();
+          var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
+          this.classList.remove('over');
+          var success_message = document.createElement('p');
+          success_message.innerHTML = 'Playlist successfully dropped: ' + drop.uri;
+          this.appendChild(success_message);
+          setupDroppedPlaylist(drop);
+        }, false);
+
+      </script>
+    </div>
+  </div>
+</body>
+        </html>
