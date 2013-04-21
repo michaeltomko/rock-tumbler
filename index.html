@@ -69,6 +69,7 @@
           multiple_tracks_player.context = playlist;
           multiple_tracks_player_HTML.innerHTML = '';
           multiple_tracks_player_HTML.appendChild(multiple_tracks_player.node);
+          console.log(player.canChangeShuffle);
 
           playlist.observe(models.EVENT.CHANGE, function(event) {
             original_tracks_list_HTML.innerHTML = '';
@@ -81,7 +82,6 @@
           });
 
           models.player.observe(models.EVENT.CHANGE, function(event) {
-            console.log(event);
             if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
               currentTrack = startTrack;
             } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
