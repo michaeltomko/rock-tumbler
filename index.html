@@ -44,23 +44,95 @@
         }
       </script>
       <script>
+        function RandomizerArray(length) {
+          this.length = length;
+          this.result = _.shuffle(_.range(this.length));
+        }
+
+        function RockTumbler() {
+          var _this = this;
+
+          var sp = getSpotifyApi();
+          var models = sp.require('$api/models');
+
+          this.player = models.player;
+          this.player.shuffle = false;
+
+          this.init = function(orig_playlist) {
+            _this.orig_playlist = orig_playlist;
+            _this.playlist = new models.Playlist();
+            _this.played_list = new models.Playlist();
+            _this.local_storage = localStorage[orig_playlist.name] && localStorage[orig_playlist.name].split(",").length > 0 ? localStorage[orig_playlist.name].split(",") : [];
+            _this.r = new RandomizerArray(_this.orig_playlist.length);
+          }
+
+          this.setupPlaylists = function() {
+            if (_this.local_storage.length==_this.orig_playlist.length) {
+              localStorage.removeItem(_this.orig_playlist.name);
+              _this.local_storage = getLocalStorage(_this.orig_playlist);
+            }
+
+            _(_this.r.result).each(function(value){
+              if (_.contains(_this.local_storage,_this.orig_playlist.get(value).data.uri.replace("spotify:track:",""))) {
+                _this.played_list.add(models.Track.fromURI(_this.orig_playlist.get(value).data.uri));
+              } else {
+                _this.playlist.add(models.Track.fromURI(_this.orig_playlist.get(value).data.uri));
+              }
+            });
+
+            _this.startTrack = _this.playlist.get(0);
+          }
+        }
+
+        function RockTumblerUI() {
+          var _this = this;
+
+          var sp = getSpotifyApi();
+          var views = sp.require("$api/views");
+
+          this.playlist_HTML = document.getElementById('original-tracks-list');
+          this.played_list_HTML = document.getElementById('played-tracks-list');
+          this.player_HTML = document.getElementById('player');
+
+          this.init = function(rt) {
+            _this.session = rt;
+            _this.playlist = new views.List(_this.session.playlist);
+            _this.played_list = new views.List(_this.session.played_list);
+            _this.playlist.track = _this.played_list.track = null;
+            _this.player = new views.Player();
+            setContext();
+          }
+
+          this.placeHTML = function() {
+            _this.playlist_HTML.innerHTML = _this.played_list_HTML.innerHTML = _this.player_HTML.innerHTML = '';
+            _this.playlist_HTML.appendChild(_this.playlist.node);
+            _this.played_list_HTML.appendChild(_this.played_list.node);
+            _this.player_HTML.appendChild(_this.player.node);
+          }
+
+          function setContext() {
+            _this.player.context = _this.playlist.context = _this.session.playlist;
+            _this.played_list.context = _this.session.played_list;
+          }
+        }
+
         var sp = getSpotifyApi();
         var models = sp.require('$api/models');
         var views = sp.require("$api/views");
         var player = models.player;
-        player.shuffle = false;
-
-        var orig_playlist, playlist, played_list, currentTrack, startTrack, original_tracks_list, played_tracks_list, multiple_tracks_player, played_tracks, r;
+        
+        var rt = new RockTumbler();
+        var currentTrack, startTrack, original_tracks_list, played_tracks_list, multiple_tracks_player, played_tracks, r;
 
         var original_tracks_list_HTML = document.getElementById('original-tracks-list');
         var played_tracks_list_HTML = document.getElementById('played-tracks-list');
         var multiple_tracks_player_HTML = document.getElementById('player');
 
         function diffBetweenPlaylists(main,comp1,comp2) {
-            main = _(main.tracks).map(function(track){return track.data.uri});
-            comp1 = _(comp1.tracks).map(function(track){return track.data.uri}) || [];
-            comp2 = _(comp2.tracks).map(function(track){return track.data.uri}) || [];
-            return _.difference(main,comp1,comp2);
+          main = _(main.tracks).map(function(track){return track.data.uri});
+          comp1 = _(comp1.tracks).map(function(track){return track.data.uri}) || [];
+          comp2 = _(comp2.tracks).map(function(track){return track.data.uri}) || [];
+          return _.difference(main,comp1,comp2);
         }
 
         function setupPlaylists(r,playlist,played_list) {
@@ -69,7 +141,7 @@
             played_tracks = getLocalStorage(orig_playlist);
           }
 
-          _(r).each(function(value){
+          _(r.result).each(function(value){
             if (_.contains(played_tracks,orig_playlist.get(value).data.uri.replace("spotify:track:",""))) {
               played_list.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
             } else {
@@ -111,14 +183,14 @@
             _(diffBetweenPlaylists(playlist,orig_playlist,played_list)).each(function(track){
               playlist.remove(track);
             });
-            
+
             original_tracks_list.context = playlist;
           });
           orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
             _(diffBetweenPlaylists(orig_playlist,playlist,played_list)).each(function(track){
               playlist.add(track);
             });
-            
+
             original_tracks_list.context = playlist;
           });
 
@@ -152,20 +224,14 @@
         }
 
         function setupDroppedPlaylist(drop) {
-          if (orig_playlist && drop.uri == orig_playlist.uri) {
-            return false;
-          }
+          //if (rt) return false;
 
-          orig_playlist = models.Playlist.fromURI(drop.uri);
-          playlist = new models.Playlist();
-          played_list = new models.Playlist();
+          rt.init(models.Playlist.fromURI(drop.uri));
+          rt.setupPlaylists();
 
-          r = _.shuffle(_.range(orig_playlist.length));
-          played_tracks = getLocalStorage(orig_playlist);
-
-          setupPlaylists(r,playlist,played_list);
-
-          setupView(playlist,played_list);
+          rtUI = new RockTumblerUI();
+          rtUI.init(rt);
+          rtUI.placeHTML();
         }
 
         // Handle drops
