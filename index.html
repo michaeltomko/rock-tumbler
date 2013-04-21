@@ -22,11 +22,34 @@
       <hr>
       <div id="played-tracks-list"></div>
       <script src="/js/underscore/underscore-min.js"></script>
+      <script id="worker" type="javascript/worker">
+        var msg;
+        // This script won't be parsed by JS engines
+        // because its type is javascript/worker.
+        self.onmessage = function(event) {
+          if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "initial";
+          } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "complete";
+          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate) {
+            msg = "play/pause"
+          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "next";
+          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate) {
+            msg = "previous"
+          } else if (event.data.shuffle) {
+            msg = "shuffle";
+          }
+          self.postMessage(msg);
+        }
+        // Rest of your worker code goes here.
+      </script>
       <script>
         var sp = getSpotifyApi();
         var models = sp.require('$api/models');
         var views = sp.require("$api/views");
         var player = models.player;
+        player.shuffle = false;
 
         var orig_playlist, playlist, played_list, currentTrack, startTrack, original_tracks_list, played_tracks_list, multiple_tracks_player, played_tracks, r;
 
@@ -69,7 +92,8 @@
           multiple_tracks_player.context = playlist;
           multiple_tracks_player_HTML.innerHTML = '';
           multiple_tracks_player_HTML.appendChild(multiple_tracks_player.node);
-          console.log(player.canChangeShuffle);
+
+          currentTrack = startTrack;
 
           playlist.observe(models.EVENT.CHANGE, function(event) {
             original_tracks_list_HTML.innerHTML = '';
@@ -82,9 +106,12 @@
           });
 
           models.player.observe(models.EVENT.CHANGE, function(event) {
+            worker.postMessage(_.chain(event.data).pairs().tap(function(e){e.push(["track",currentTrack.data.uri])}).object().value());
             if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
               currentTrack = startTrack;
+              console.log("initial");
             } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+              console.log("complete");
               playlist.remove(currentTrack);
               played_list.add(currentTrack);
 
@@ -98,12 +125,15 @@
 
               setupView(playlist,played_list);
 
-            } else if (event.data.curtrack && !event.data.curcontext) {
+            } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+              console.log("next");
               played_tracks.push(currentTrack.data.uri);
               localStorage[orig_playlist.name] = played_tracks;
               playlist.remove(currentTrack);
               played_list.add(currentTrack);
               currentTrack = player.track;
+            } else if (event.data.shuffle) {
+              player.shuffle = false;
             }
           });
         }
@@ -152,6 +182,7 @@
 
         drop_box.addEventListener('drop', function(e){
           e.preventDefault();
+          player.shuffle = false;
           var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
           this.classList.remove('over');
           var success_message = document.createElement('p');
@@ -160,6 +191,18 @@
           setupDroppedPlaylist(drop);
         }, false);
 
+        function log(msg) {
+          // Use a fragment: browser will only render/reflow once.
+          console.log(msg);
+        }
+
+        var blob = new Blob([document.querySelector('#worker').textContent]);
+
+        var worker = new Worker(window.URL.createObjectURL(blob));
+        worker.onmessage = function(e) {
+          log("Received: " + e.data);
+        }
+        //worker.postMessage(); // Start the worker.
       </script>
     </div>
   </div>
