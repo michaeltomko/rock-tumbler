@@ -57,19 +57,20 @@
 
           this.player = models.player;
           this.player.shuffle = false;
+          this.current_track = this.start_track = null;
 
           this.init = function(orig_playlist) {
             _this.orig_playlist = orig_playlist;
             _this.playlist = new models.Playlist();
             _this.played_list = new models.Playlist();
-            _this.local_storage = localStorage[orig_playlist.name] && localStorage[orig_playlist.name].split(",").length > 0 ? localStorage[orig_playlist.name].split(",") : [];
+            _this.local_storage = getLocalStorage();
             _this.r = new RandomizerArray(_this.orig_playlist.length);
           }
 
           this.setupPlaylists = function() {
             if (_this.local_storage.length==_this.orig_playlist.length) {
               localStorage.removeItem(_this.orig_playlist.name);
-              _this.local_storage = getLocalStorage(_this.orig_playlist);
+              _this.local_storage = getLocalStorage();
             }
 
             _(_this.r.result).each(function(value){
@@ -80,7 +81,19 @@
               }
             });
 
-            _this.startTrack = _this.playlist.get(0);
+            _this.start_track = _this.playlist.get(0);
+          }
+
+          this.expireCurrentTrack = function() {
+            _this.local_storage.push(_this.current_track.data.uri.replace("spotify:track:",""));
+            localStorage[_this.orig_playlist.name] = _this.local_storage;
+            _this.playlist.remove(_this.current_track);
+            _this.played_list.add(_this.current_track);
+            if (_this.player.track) _this.current_track = _this.player.track;
+          }
+
+          function getLocalStorage() {
+            return _this.local_storage = localStorage[_this.orig_playlist.name] && localStorage[_this.orig_playlist.name].split(",").length > 0 ? localStorage[_this.orig_playlist.name].split(",") : [];
           }
         }
 
@@ -100,7 +113,7 @@
             _this.played_list = new views.List(_this.session.played_list);
             _this.playlist.track = _this.played_list.track = null;
             _this.player = new views.Player();
-            setContext();
+            _this.setContext();
           }
 
           this.placeHTML = function() {
@@ -110,23 +123,55 @@
             _this.player_HTML.appendChild(_this.player.node);
           }
 
-          function setContext() {
+          this.setContext = function() {
             _this.player.context = _this.playlist.context = _this.session.playlist;
             _this.played_list.context = _this.session.played_list;
           }
         }
 
+        function RockTumblerObservers(rt,rtUI,models) {
+          rt.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
+            _(diffBetweenPlaylists(rt.playlist,rt.orig_playlist,rt.played_list)).each(function(track){
+              rt.playlist.remove(track);
+            });
+
+            rtUI.setContext();
+          });
+          rt.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
+            _(diffBetweenPlaylists(rt.orig_playlist,rt.playlist,rt.played_list)).each(function(track){
+              rt.playlist.add(track);
+            });
+
+            rtUI.setContext();
+          });
+
+          rt.playlist.observe(models.EVENT.CHANGE, function(event) {
+            rtUI.setContext();
+          });
+
+          rt.played_list.observe(models.EVENT.CHANGE, function(event) {
+            rtUI.setContext();
+          });
+
+          rt.player.observe(models.EVENT.CHANGE, function(event) {
+            //worker.postMessage(_.chain(event.data).pairs().tap(function(e){e.push(["track",currentTrack.data.uri])}).object().value());
+            if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
+              rt.current_track = rt.start_track;
+            } else if ((event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) || (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate)) {
+              rt.expireCurrentTrack();
+            } else if (event.data.shuffle) {
+              rt.player.shuffle = false;
+            }
+          });
+        }
+
         var sp = getSpotifyApi();
         var models = sp.require('$api/models');
         var views = sp.require("$api/views");
-        var player = models.player;
-        
-        var rt = new RockTumbler();
-        var currentTrack, startTrack, original_tracks_list, played_tracks_list, multiple_tracks_player, played_tracks, r;
 
-        var original_tracks_list_HTML = document.getElementById('original-tracks-list');
-        var played_tracks_list_HTML = document.getElementById('played-tracks-list');
-        var multiple_tracks_player_HTML = document.getElementById('player');
+        var rt = new RockTumbler();
+
+        //TODO: Modify drop.
 
         function diffBetweenPlaylists(main,comp1,comp2) {
           main = _(main.tracks).map(function(track){return track.data.uri});
@@ -135,96 +180,8 @@
           return _.difference(main,comp1,comp2);
         }
 
-        function setupPlaylists(r,playlist,played_list) {
-          if (played_tracks.length==orig_playlist.length) {
-            localStorage.removeItem(orig_playlist.name);
-            played_tracks = getLocalStorage(orig_playlist);
-          }
-
-          _(r.result).each(function(value){
-            if (_.contains(played_tracks,orig_playlist.get(value).data.uri.replace("spotify:track:",""))) {
-              played_list.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
-            } else {
-              playlist.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
-            }
-          });
-
-          startTrack = playlist.get(0);
-        }
-
-        function getLocalStorage(orig_playlist) {
-          return localStorage[orig_playlist.name] && localStorage[orig_playlist.name].split(",").length > 0 ? localStorage[orig_playlist.name].split(",") : [];
-        }
-
-        function setupView(playlist,played_list) {
-          var original_tracks_list = new views.List(playlist);
-          original_tracks_list.track = null; // Don't play the track right away
-          original_tracks_list.context = playlist;
-
-          var played_tracks_list = new views.List(played_list);
-          played_tracks_list.track = null; // Don't play the track right away
-          played_tracks_list.context = played_list;
-
-          original_tracks_list_HTML.innerHTML = '';
-          original_tracks_list_HTML.appendChild(original_tracks_list.node);
-
-          played_tracks_list_HTML.innerHTML = '';
-          played_tracks_list_HTML.appendChild(played_tracks_list.node);
-
-          /* Append a player */
-          multiple_tracks_player = new views.Player();
-          multiple_tracks_player.context = playlist;
-          multiple_tracks_player_HTML.innerHTML = '';
-          multiple_tracks_player_HTML.appendChild(multiple_tracks_player.node);
-
-          currentTrack = startTrack;
-
-          orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-            _(diffBetweenPlaylists(playlist,orig_playlist,played_list)).each(function(track){
-              playlist.remove(track);
-            });
-
-            original_tracks_list.context = playlist;
-          });
-          orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            _(diffBetweenPlaylists(orig_playlist,playlist,played_list)).each(function(track){
-              playlist.add(track);
-            });
-
-            original_tracks_list.context = playlist;
-          });
-
-          playlist.observe(models.EVENT.CHANGE, function(event) {
-            original_tracks_list.context = playlist;
-          });
-
-          played_list.observe(models.EVENT.CHANGE, function(event) {
-            played_tracks_list.context = played_list;
-          });
-
-          models.player.observe(models.EVENT.CHANGE, function(event) {
-            worker.postMessage(_.chain(event.data).pairs().tap(function(e){e.push(["track",currentTrack.data.uri])}).object().value());
-            if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
-              currentTrack = startTrack;
-            } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
-              played_tracks.push(currentTrack.data.uri.replace("spotify:track:",""));
-              localStorage[orig_playlist.name] = played_tracks;
-              playlist.remove(currentTrack);
-              played_list.add(currentTrack);
-            } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
-              played_tracks.push(currentTrack.data.uri.replace("spotify:track:",""));
-              localStorage[orig_playlist.name] = played_tracks;
-              playlist.remove(currentTrack);
-              played_list.add(currentTrack);
-              currentTrack = player.track;
-            } else if (event.data.shuffle) {
-              player.shuffle = false;
-            }
-          });
-        }
-
         function setupDroppedPlaylist(drop) {
-          //if (rt) return false;
+          if (!typeof(rt)==='undefined') return false;
 
           rt.init(models.Playlist.fromURI(drop.uri));
           rt.setupPlaylists();
@@ -232,6 +189,7 @@
           rtUI = new RockTumblerUI();
           rtUI.init(rt);
           rtUI.placeHTML();
+          RockTumblerObservers(rt,rtUI,models);
         }
 
         // Handle drops
@@ -270,17 +228,17 @@
           setupDroppedPlaylist(drop);
         }, false);
 
-        function log(msg) {
+       // function log(msg) {
           // Use a fragment: browser will only render/reflow once.
-          console.log(msg);
-        }
+      //    console.log(msg);
+      //  }
 
-        var blob = new Blob([document.querySelector('#worker').textContent]);
+      //  var blob = new Blob([document.querySelector('#worker').textContent]);
 
-        var worker = new Worker(window.URL.createObjectURL(blob));
-        worker.onmessage = function(e) {
-          log("Received: " + e.data);
-        }
+      //  var worker = new Worker(window.URL.createObjectURL(blob));
+      //  worker.onmessage = function(e) {
+      //    log("Received: " + e.data);
+      //  }
         //worker.postMessage(); // Start the worker.
 
         var detonateButton = document.getElementById('detonate');
