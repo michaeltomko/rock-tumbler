@@ -28,25 +28,25 @@
         self.onmessage = function(event) {
           if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
             msg = "initial";
-          } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
-            msg = "complete";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate) {
-            msg = "play/pause"
-          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "play/pause";
+          } else if ((event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) || (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate)) {
             msg = "next";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate) {
-            msg = "previous"
+            msg = "previous";
+          } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "jumped";
           } else if (event.data.shuffle) {
             msg = "shuffle";
           }
           self.postMessage(msg);
-          self.close();
         }
       </script>
       <script>
         function RandomizerArray(length) {
           this.length = length;
           this.result = _.shuffle(_.range(this.length));
+          return true;
         }
 
         function RockTumbler() {
@@ -65,6 +65,7 @@
             _this.played_list = new models.Playlist();
             _this.local_storage = getLocalStorage();
             _this.r = new RandomizerArray(_this.orig_playlist.length);
+            return true;
           }
 
           this.setupPlaylists = function() {
@@ -82,6 +83,7 @@
             });
 
             _this.start_track = _this.playlist.get(0);
+            return true;
           }
 
           this.expireCurrentTrack = function() {
@@ -90,10 +92,18 @@
             _this.playlist.remove(_this.current_track);
             _this.played_list.add(_this.current_track);
             if (_this.player.track) _this.current_track = _this.player.track;
+            return true;
+          }
+
+          this.moveCurrentTrackToHead = function() {
+            _this.playlist.data.move(_this.player.track.data.uri,0);
+            _this.current_track = _this.playlist.get(0);
+            return true;
           }
 
           function getLocalStorage() {
             return _this.local_storage = localStorage[_this.orig_playlist.name] && localStorage[_this.orig_playlist.name].split(",").length > 0 ? localStorage[_this.orig_playlist.name].split(",") : [];
+            return true;
           }
         }
 
@@ -114,6 +124,7 @@
             _this.playlist.track = _this.played_list.track = null;
             _this.player = new views.Player();
             _this.setContext();
+            return true;
           }
 
           this.placeHTML = function() {
@@ -121,11 +132,13 @@
             _this.playlist_HTML.appendChild(_this.playlist.node);
             _this.played_list_HTML.appendChild(_this.played_list.node);
             _this.player_HTML.appendChild(_this.player.node);
+            return true;
           }
 
           this.setContext = function() {
             _this.player.context = _this.playlist.context = _this.session.playlist;
             _this.played_list.context = _this.session.played_list;
+            return true;
           }
         }
 
@@ -154,15 +167,9 @@
           });
 
           rt.player.observe(models.EVENT.CHANGE, function(event) {
-            //worker.postMessage(_.chain(event.data).pairs().tap(function(e){e.push(["track",currentTrack.data.uri])}).object().value());
-            if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
-              rt.current_track = rt.start_track;
-            } else if ((event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) || (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate)) {
-              rt.expireCurrentTrack();
-            } else if (event.data.shuffle) {
-              rt.player.shuffle = false;
-            }
+            worker.postMessage(_.chain(event.data).pairs().object().value());
           });
+          return true;
         }
 
         var sp = getSpotifyApi();
@@ -171,7 +178,7 @@
 
         var rt = new RockTumbler();
 
-        //TODO: Modify drop.
+        //TODO: Modify drop. Refactor. 
 
         function diffBetweenPlaylists(main,comp1,comp2) {
           main = _(main.tracks).map(function(track){return track.data.uri});
@@ -228,18 +235,34 @@
           setupDroppedPlaylist(drop);
         }, false);
 
-       // function log(msg) {
-          // Use a fragment: browser will only render/reflow once.
-      //    console.log(msg);
-      //  }
+        function respond(e,rt) {
+          switch (e.data) {
+            case "initial":
+              if (rt.playlist.indexOf(rt.player.track) != 0) {
+                rt.moveCurrentTrackToHead();
+              } else {
+                rt.current_track = rt.start_track;
+              }
+            break;
+            case "next":
+              rt.expireCurrentTrack();
+            break;
+            case "jumped":
+              if (rt.playlist.indexOf(rt.player.track) != 0) {
+                rt.moveCurrentTrackToHead();
+              }
+            case "shuffle":
+              rt.player.shuffle = false;
+            break;
+          }          
+        }
 
-      //  var blob = new Blob([document.querySelector('#worker').textContent]);
+        var blob = new Blob([document.querySelector('#worker').textContent]);
 
-      //  var worker = new Worker(window.URL.createObjectURL(blob));
-      //  worker.onmessage = function(e) {
-      //    log("Received: " + e.data);
-      //  }
-        //worker.postMessage(); // Start the worker.
+        var worker = new Worker(window.URL.createObjectURL(blob));
+        worker.onmessage = function(e) {
+          respond(e,rt);
+        }
 
         var detonateButton = document.getElementById('detonate');
         detonateButton.addEventListener('click', detonate);
