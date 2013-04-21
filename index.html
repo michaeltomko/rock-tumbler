@@ -25,8 +25,6 @@
       <script src="/js/underscore/underscore-min.js"></script>
       <script id="worker" type="javascript/worker">
         var msg;
-        // This script won't be parsed by JS engines
-        // because its type is javascript/worker.
         self.onmessage = function(event) {
           if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
             msg = "initial";
@@ -44,7 +42,6 @@
           self.postMessage(msg);
           self.close();
         }
-        // Rest of your worker code goes here.
       </script>
       <script>
         var sp = getSpotifyApi();
