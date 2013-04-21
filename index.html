@@ -70,7 +70,7 @@
           }
 
           _(r).each(function(value){
-            if (_.contains(played_tracks,orig_playlist.get(value).data.uri)) {
+            if (_.contains(played_tracks,orig_playlist.get(value).data.uri.replace("spotify:track:",""))) {
               played_list.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
             } else {
               playlist.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
@@ -135,12 +135,12 @@
             if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
               currentTrack = startTrack;
             } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
-              played_tracks.push(currentTrack.data.uri);
+              played_tracks.push(currentTrack.data.uri.replace("spotify:track:",""));
               localStorage[orig_playlist.name] = played_tracks;
               playlist.remove(currentTrack);
               played_list.add(currentTrack);
             } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
-              played_tracks.push(currentTrack.data.uri);
+              played_tracks.push(currentTrack.data.uri.replace("spotify:track:",""));
               localStorage[orig_playlist.name] = played_tracks;
               playlist.remove(currentTrack);
               played_list.add(currentTrack);
