@@ -48,9 +48,31 @@
           this.result = _.shuffle(_.range(this.length));
           return true;
         }
+        
+        function NextHandler(timeout) {
+          var _this = this,count,to_remove;
+
+          var eventTimeoutId;
+          this.indexCounter = 0;
+          this.timeoutThreshold = timeout;
+
+          this.next = function(rt) {
+            _this.indexCounter++;
+            console.log(_this.indexCounter);
+            clearTimeout(eventTimeoutId);
+            eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
+          }
+
+          function onTimeout(rt) {
+            count = _this.indexCounter;
+            _this.indexCounter = 0;
+            to_remove = rt.track_array.splice(0,count);
+            _.each(to_remove, function(track){rt.expireTrack(track);});
+          }
+        }
 
         function RockTumbler() {
-          var _this = this;
+          var _this = this,i,t;
 
           var sp = getSpotifyApi();
           var models = sp.require('$api/models');
@@ -63,22 +85,26 @@
             _this.orig_playlist = orig_playlist;
             _this.playlist = new models.Playlist();
             _this.played_list = new models.Playlist();
+            _this.track_array = [];
             _this.local_storage = getLocalStorage();
             _this.r = new RandomizerArray(_this.orig_playlist.length);
             return true;
           }
 
           this.setupPlaylists = function() {
+            var track_uri;
             if (_this.local_storage.length==_this.orig_playlist.length) {
               localStorage.removeItem(_this.orig_playlist.name);
               _this.local_storage = getLocalStorage();
             }
 
             _(_this.r.result).each(function(value){
-              if (_.contains(_this.local_storage,_this.orig_playlist.get(value).data.uri.replace("spotify:track:",""))) {
-                _this.played_list.add(models.Track.fromURI(_this.orig_playlist.get(value).data.uri));
+              track_uri = _this.orig_playlist.get(value).data.uri;
+              if (_.contains(_this.local_storage,track_uri.replace("spotify:track:",""))) {
+                _this.played_list.add(models.Track.fromURI(track_uri));
               } else {
-                _this.playlist.add(models.Track.fromURI(_this.orig_playlist.get(value).data.uri));
+                _this.playlist.add(models.Track.fromURI(track_uri));
+                _this.track_array.push(track_uri);
               }
             });
 
@@ -86,16 +112,19 @@
             return true;
           }
 
-          this.expireCurrentTrack = function() {
-            _this.local_storage.push(_this.current_track.data.uri.replace("spotify:track:",""));
+          this.expireTrack = function(track) {
+            _this.local_storage.push(track.replace("spotify:track:",""));
             localStorage[_this.orig_playlist.name] = _this.local_storage;
-            _this.playlist.remove(_this.current_track);
-            _this.played_list.add(_this.current_track);
+            _this.playlist.remove(track);
+            _this.played_list.add(track);
             if (_this.player.track) _this.current_track = _this.player.track;
             return true;
           }
 
           this.moveCurrentTrackToHead = function() {
+            i = _this.playlist.indexOf(_this.player.track.data.uri);
+            t = _this.track_array.splice(i,1);
+            _this.track_array.unshift(_.first(t));
             _this.playlist.data.move(_this.player.track.data.uri,0);
             _this.current_track = _this.playlist.get(0);
             return true;
@@ -108,7 +137,7 @@
         }
 
         function RockTumblerUI() {
-          var _this = this;
+          var _this = this,i;
 
           var sp = getSpotifyApi();
           var views = sp.require("$api/views");
@@ -146,24 +175,27 @@
           rt.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
             _(diffBetweenPlaylists(rt.playlist,rt.orig_playlist,rt.played_list)).each(function(track){
               rt.playlist.remove(track);
+              i = _.indexOf(rt.track_array,track,true);
+              rt.track_array.splice(i,1);
             });
 
-            rtUI.setContext();
+            //rtUI.setContext();
           });
           rt.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
             _(diffBetweenPlaylists(rt.orig_playlist,rt.playlist,rt.played_list)).each(function(track){
               rt.playlist.add(track);
+              rt.track_array.push(track);
             });
 
-            rtUI.setContext();
+            //rtUI.setContext();
           });
 
           rt.playlist.observe(models.EVENT.CHANGE, function(event) {
-            rtUI.setContext();
+            //rtUI.setContext();
           });
 
           rt.played_list.observe(models.EVENT.CHANGE, function(event) {
-            rtUI.setContext();
+            //rtUI.setContext();
           });
 
           rt.player.observe(models.EVENT.CHANGE, function(event) {
@@ -197,6 +229,7 @@
           rtUI.init(rt);
           rtUI.placeHTML();
           RockTumblerObservers(rt,rtUI,models);
+          nh = new NextHandler(500);
         }
 
         // Handle drops
@@ -245,7 +278,7 @@
               }
             break;
             case "next":
-              rt.expireCurrentTrack();
+              nh.next(rt);
             break;
             case "jumped":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
