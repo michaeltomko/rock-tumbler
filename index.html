@@ -30,8 +30,10 @@
             msg = "initial";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate) {
             msg = "play/pause";
-          } else if ((event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) || (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate)) {
+          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
             msg = "next";
+          } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "ended";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate) {
             msg = "previous";
           } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
@@ -58,7 +60,6 @@
 
           this.next = function(rt) {
             _this.indexCounter++;
-            console.log(_this.indexCounter);
             clearTimeout(eventTimeoutId);
             eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
           }
@@ -200,6 +201,7 @@
 
           rt.player.observe(models.EVENT.CHANGE, function(event) {
             worker.postMessage(_.chain(event.data).pairs().object().value());
+            console.log(event);
           });
           return true;
         }
@@ -269,6 +271,7 @@
         }, false);
 
         function respond(e,rt) {
+          console.log(e.data);
           switch (e.data) {
             case "initial":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
@@ -278,6 +281,9 @@
               }
             break;
             case "next":
+              nh.next(rt);
+            break;
+            case "ended":
               nh.next(rt);
             break;
             case "jumped":
