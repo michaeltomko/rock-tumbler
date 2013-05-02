@@ -95,7 +95,7 @@
           this.setupPlaylists = function() {
             var track_uri;
             if (_this.local_storage.length==_this.orig_playlist.length) {
-              localStorage.removeItem(_this.orig_playlist.name);
+              localStorage.removeItem(_this.orig_playlist.data.uri);
               _this.local_storage = getLocalStorage();
             }
 
@@ -115,7 +115,7 @@
 
           this.expireTrack = function(track) {
             _this.local_storage.push(track.replace("spotify:track:",""));
-            localStorage[_this.orig_playlist.name] = _this.local_storage;
+            localStorage[_this.orig_playlist.data.uri] = _this.local_storage;
             _this.playlist.remove(track);
             _this.played_list.add(track);
             if (_this.player.track) _this.current_track = _this.player.track;
@@ -132,7 +132,7 @@
           }
 
           function getLocalStorage() {
-            return _this.local_storage = localStorage[_this.orig_playlist.name] && localStorage[_this.orig_playlist.name].split(",").length > 0 ? localStorage[_this.orig_playlist.name].split(",") : [];
+            return _this.local_storage = localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
             return true;
           }
         }
@@ -307,7 +307,7 @@
         detonateButton.addEventListener('click', detonate);
 
         function detonate() {
-          localStorage.clear();
+          localStorage.removeItem(rt.orig_playlist.data.uri);
         }
       </script>
     </div>
