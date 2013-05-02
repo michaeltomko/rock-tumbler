@@ -132,8 +132,11 @@
           }
 
           function getLocalStorage() {
-            return _this.local_storage = localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
-            return true;
+            if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
+            localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
+            localStorage.removeItem(rt.orig_playlist.name);
+            }
+            return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
           }
         }
 
@@ -201,7 +204,6 @@
 
           rt.player.observe(models.EVENT.CHANGE, function(event) {
             worker.postMessage(_.chain(event.data).pairs().object().value());
-            console.log(event);
           });
           return true;
         }
@@ -271,7 +273,6 @@
         }, false);
 
         function respond(e,rt) {
-          console.log(e.data);
           switch (e.data) {
             case "initial":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
