@@ -18,15 +18,16 @@ h1 {font-size:2em;}
 
 
 /* Player */
-#player {min-height:140px;}
-#player .sp-player {float:left;margin-right:10px;}
+#player {min-height:140px; float:right;}
+#player .sp-player {float:left;width:250px;height:250px;}
 #player .sp-list {width:inherit;max-height:inherit;}
 
-
 /* Drop Box */
-#drop_box {border:4px dashed #333;width:100%;height:200px;padding:10px;}
+#drop_box {float:left;width:600px;border:4px dashed #333;height:222px;padding:10px;}
 #drop_box.over {opacity:0.8;border-color:#74c043;}
 
 /* Index */
 #index h1, #index ul {margin:0 0 30px;}
 #index a:hover {color:#83be20;}
+
+.clearfix {clear:both;}

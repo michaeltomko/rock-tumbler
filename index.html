@@ -14,14 +14,16 @@
   <div id="wrapper">
     <div id="index" class="section">
       <h2>Rock Tumbler</h2>
-      <div id="drop_box"></div>
-      <hr>
+      <div id="drop_box" class=""></div>
       <div id="player"></div>
+      <div class="clearfix"></div>
       <hr>
       <div id="original-tracks-list"></div>
       <hr>
       <div id="played-tracks-list"></div>
-      <input type="button" id="detonate" value="Detonate">
+      <hr>
+      <input type="button" id="detonate-this" value="Detonate This Playlist">
+      <input type="button" id="detonate-all" value="Detonate All Playlists">
       <script src="/js/underscore/underscore-min.js"></script>
       <script id="worker" type="javascript/worker">
         var msg;
@@ -267,7 +269,7 @@
           var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
           this.classList.remove('over');
           var success_message = document.createElement('p');
-          success_message.innerHTML = 'Playlist successfully dropped: ' + drop.uri;
+          success_message.innerHTML = 'Playlist: ' + drop.name;
           this.appendChild(success_message);
           setupDroppedPlaylist(drop);
         }, false);
@@ -304,11 +306,17 @@
           respond(e,rt);
         }
 
-        var detonateButton = document.getElementById('detonate');
-        detonateButton.addEventListener('click', detonate);
+        var detonateThisButton = document.getElementById('detonate-this');
+        detonateThisButton.addEventListener('click', detonateThis);
 
-        function detonate() {
+        var detonateAllButton = document.getElementById('detonate-this');
+        detonateAllButton.addEventListener('click', detonateAll);
+
+        function detonateThis() {
           localStorage.removeItem(rt.orig_playlist.data.uri);
+        }
+        function detonateAll() {
+          localStorage.clear();
         }
       </script>
     </div>
