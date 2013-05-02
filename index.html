@@ -14,115 +14,228 @@
   <div id="wrapper">
     <div id="index" class="section">
       <h2>Rock Tumbler</h2>
-      <div id="drop_box"></div>
-      <hr>
+      <div id="drop_box" class=""></div>
       <div id="player"></div>
+      <div class="clearfix"></div>
       <hr>
       <div id="original-tracks-list"></div>
       <hr>
       <div id="played-tracks-list"></div>
+      <hr>
+      <input type="button" id="detonate-this" value="Detonate This Playlist">
+      <input type="button" id="detonate-all" value="Detonate All Playlists">
       <script src="/js/underscore/underscore-min.js"></script>
+      <script id="worker" type="javascript/worker">
+        var msg;
+        self.onmessage = function(event) {
+          if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "initial";
+          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate) {
+            msg = "play/pause";
+          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "next";
+          } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "ended";
+          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate) {
+            msg = "previous";
+          } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "jumped";
+          } else if (event.data.shuffle) {
+            msg = "shuffle";
+          }
+          self.postMessage(msg);
+        }
+      </script>
       <script>
+        function RandomizerArray(length) {
+          this.length = length;
+          this.result = _.shuffle(_.range(this.length));
+          return true;
+        }
+        
+        function NextHandler(timeout) {
+          var _this = this,count,to_remove;
+
+          var eventTimeoutId;
+          this.indexCounter = 0;
+          this.timeoutThreshold = timeout;
+
+          this.next = function(rt) {
+            _this.indexCounter++;
+            clearTimeout(eventTimeoutId);
+            eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
+          }
+
+          function onTimeout(rt) {
+            count = _this.indexCounter;
+            _this.indexCounter = 0;
+            to_remove = rt.track_array.splice(0,count);
+            _.each(to_remove, function(track){rt.expireTrack(track);});
+          }
+        }
+
+        function RockTumbler() {
+          var _this = this,i,t;
+
+          var sp = getSpotifyApi();
+          var models = sp.require('$api/models');
+
+          this.player = models.player;
+          this.player.shuffle = false;
+          this.current_track = this.start_track = null;
+
+          this.init = function(orig_playlist) {
+            _this.orig_playlist = orig_playlist;
+            _this.playlist = new models.Playlist();
+            _this.played_list = new models.Playlist();
+            _this.track_array = [];
+            _this.local_storage = getLocalStorage();
+            _this.r = new RandomizerArray(_this.orig_playlist.length);
+            return true;
+          }
+
+          this.setupPlaylists = function() {
+            var track_uri;
+            if (_this.local_storage.length==_this.orig_playlist.length) {
+              localStorage.removeItem(_this.orig_playlist.data.uri);
+              _this.local_storage = getLocalStorage();
+            }
+
+            _(_this.r.result).each(function(value){
+              track_uri = _this.orig_playlist.get(value).data.uri;
+              if (_.contains(_this.local_storage,track_uri.replace("spotify:track:",""))) {
+                _this.played_list.add(models.Track.fromURI(track_uri));
+              } else {
+                _this.playlist.add(models.Track.fromURI(track_uri));
+                _this.track_array.push(track_uri);
+              }
+            });
+
+            _this.start_track = _this.playlist.get(0);
+            return true;
+          }
+
+          this.expireTrack = function(track) {
+            _this.local_storage.push(track.replace("spotify:track:",""));
+            localStorage[_this.orig_playlist.data.uri] = _this.local_storage;
+            _this.playlist.remove(track);
+            _this.played_list.add(track);
+            if (_this.player.track) _this.current_track = _this.player.track;
+            return true;
+          }
+
+          this.moveCurrentTrackToHead = function() {
+            i = _this.playlist.indexOf(_this.player.track.data.uri);
+            t = _this.track_array.splice(i,1);
+            _this.track_array.unshift(_.first(t));
+            _this.playlist.data.move(_this.player.track.data.uri,0);
+            _this.current_track = _this.playlist.get(0);
+            return true;
+          }
+
+          function getLocalStorage() {
+            if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
+            localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
+            localStorage.removeItem(rt.orig_playlist.name);
+            }
+            return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
+          }
+        }
+
+        function RockTumblerUI() {
+          var _this = this,i;
+
+          var sp = getSpotifyApi();
+          var views = sp.require("$api/views");
+
+          this.playlist_HTML = document.getElementById('original-tracks-list');
+          this.played_list_HTML = document.getElementById('played-tracks-list');
+          this.player_HTML = document.getElementById('player');
+
+          this.init = function(rt) {
+            _this.session = rt;
+            _this.playlist = new views.List(_this.session.playlist);
+            _this.played_list = new views.List(_this.session.played_list);
+            _this.playlist.track = _this.played_list.track = null;
+            _this.player = new views.Player();
+            _this.setContext();
+            return true;
+          }
+
+          this.placeHTML = function() {
+            _this.playlist_HTML.innerHTML = _this.played_list_HTML.innerHTML = _this.player_HTML.innerHTML = '';
+            _this.playlist_HTML.appendChild(_this.playlist.node);
+            _this.played_list_HTML.appendChild(_this.played_list.node);
+            _this.player_HTML.appendChild(_this.player.node);
+            return true;
+          }
+
+          this.setContext = function() {
+            _this.player.context = _this.playlist.context = _this.session.playlist;
+            _this.played_list.context = _this.session.played_list;
+            return true;
+          }
+        }
+
+        function RockTumblerObservers(rt,rtUI,models) {
+          rt.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
+            _(diffBetweenPlaylists(rt.playlist,rt.orig_playlist,rt.played_list)).each(function(track){
+              rt.playlist.remove(track);
+              i = _.indexOf(rt.track_array,track,true);
+              rt.track_array.splice(i,1);
+            });
+
+            //rtUI.setContext();
+          });
+          rt.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
+            _(diffBetweenPlaylists(rt.orig_playlist,rt.playlist,rt.played_list)).each(function(track){
+              rt.playlist.add(track);
+              rt.track_array.push(track);
+            });
+
+            //rtUI.setContext();
+          });
+
+          rt.playlist.observe(models.EVENT.CHANGE, function(event) {
+            //rtUI.setContext();
+          });
+
+          rt.played_list.observe(models.EVENT.CHANGE, function(event) {
+            //rtUI.setContext();
+          });
+
+          rt.player.observe(models.EVENT.CHANGE, function(event) {
+            worker.postMessage(_.chain(event.data).pairs().object().value());
+          });
+          return true;
+        }
+
         var sp = getSpotifyApi();
         var models = sp.require('$api/models');
         var views = sp.require("$api/views");
-        var player = models.player;
 
-        var orig_playlist, playlist, played_list, currentTrack, startTrack, original_tracks_list, played_tracks_list, multiple_tracks_player, played_tracks, r;
+        var rt = new RockTumbler();
 
-        var original_tracks_list_HTML = document.getElementById('original-tracks-list');
-        var played_tracks_list_HTML = document.getElementById('played-tracks-list');
-        var multiple_tracks_player_HTML = document.getElementById('player');
+        //TODO: Modify drop. Refactor. 
 
-        function setupPlaylists(r,playlist,played_list) {
-          _(r).each(function(value){
-            if (_.contains(played_tracks,orig_playlist.get(value).data.uri)) {
-              played_list.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
-            } else {
-              playlist.add(models.Track.fromURI(orig_playlist.get(value).data.uri));
-            }
-          });
-          startTrack = playlist.get(0);
-        }
-
-        function getLocalStorage(orig_playlist) {
-          return localStorage[orig_playlist.name] && localStorage[orig_playlist.name].split(",").length > 0 ? localStorage[orig_playlist.name].split(",") : [];
-        }
-
-        function setupView(playlist,played_list) {
-          original_tracks_list = new views.List(playlist);
-          original_tracks_list.track = playlist.get(0); // Don't play the track right away
-          original_tracks_list.context = playlist;
-
-          played_tracks_list = new views.List(played_list);
-          played_tracks_list.track = null; // Don't play the track right away
-          played_tracks_list.context = played_list;
-
-          original_tracks_list_HTML.innerHTML = '';
-          original_tracks_list_HTML.appendChild(original_tracks_list.node);
-
-          played_tracks_list_HTML.innerHTML = '';
-          played_tracks_list_HTML.appendChild(played_tracks_list.node);
-
-          /* Append a player */
-          multiple_tracks_player = new views.Player();
-          multiple_tracks_player.context = playlist;
-          multiple_tracks_player_HTML.innerHTML = '';
-          multiple_tracks_player_HTML.appendChild(multiple_tracks_player.node);
-          console.log(player.canChangeShuffle);
-
-          playlist.observe(models.EVENT.CHANGE, function(event) {
-            original_tracks_list_HTML.innerHTML = '';
-            original_tracks_list_HTML.appendChild(original_tracks_list.node);
-          });
-
-          playlist.observe(models.EVENT.CHANGE, function(event) {
-            played_tracks_list_HTML.innerHTML = '';
-            played_tracks_list_HTML.appendChild(played_tracks_list.node);
-          });
-
-          models.player.observe(models.EVENT.CHANGE, function(event) {
-            if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
-              currentTrack = startTrack;
-            } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
-              playlist.remove(currentTrack);
-              played_list.add(currentTrack);
-
-              if (playlist.length == 0) {
-                localStorage.removeItem(orig_playlist.name);
-                played_tracks = getOrSetLocalStorage(orig_playlist);
-                playlist = new models.Playlist();
-                played_list = new models.Playlist();
-                setupPlaylists(r,playlist,played_list);
-              }
-
-              setupView(playlist,played_list);
-
-            } else if (event.data.curtrack && !event.data.curcontext) {
-              played_tracks.push(currentTrack.data.uri);
-              localStorage[orig_playlist.name] = played_tracks;
-              playlist.remove(currentTrack);
-              played_list.add(currentTrack);
-              currentTrack = player.track;
-            }
-          });
+        function diffBetweenPlaylists(main,comp1,comp2) {
+          main = _(main.tracks).map(function(track){return track.data.uri});
+          comp1 = _(comp1.tracks).map(function(track){return track.data.uri}) || [];
+          comp2 = _(comp2.tracks).map(function(track){return track.data.uri}) || [];
+          return _.difference(main,comp1,comp2);
         }
 
         function setupDroppedPlaylist(drop) {
-          if (orig_playlist && drop.uri == orig_playlist.uri) {
-            return false;
-          }
+          if (!typeof(rt)==='undefined') return false;
 
-          orig_playlist = models.Playlist.fromURI(drop.uri);
-          playlist = new models.Playlist();
-          played_list = new models.Playlist();
+          rt.init(models.Playlist.fromURI(drop.uri));
+          rt.setupPlaylists();
 
-          r = _.shuffle(_.range(orig_playlist.length));
-          played_tracks = getLocalStorage(orig_playlist);
-
-          setupPlaylists(r,playlist,played_list);
-
-          setupView(playlist,played_list);
+          rtUI = new RockTumblerUI();
+          rtUI.init(rt);
+          rtUI.placeHTML();
+          RockTumblerObservers(rt,rtUI,models);
+          nh = new NextHandler(500);
         }
 
         // Handle drops
@@ -152,14 +265,59 @@
 
         drop_box.addEventListener('drop', function(e){
           e.preventDefault();
+          player.shuffle = false;
           var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
           this.classList.remove('over');
           var success_message = document.createElement('p');
-          success_message.innerHTML = 'Playlist successfully dropped: ' + drop.uri;
+          success_message.innerHTML = 'Playlist: ' + drop.name;
           this.appendChild(success_message);
           setupDroppedPlaylist(drop);
         }, false);
 
+        function respond(e,rt) {
+          switch (e.data) {
+            case "initial":
+              if (rt.playlist.indexOf(rt.player.track) != 0) {
+                rt.moveCurrentTrackToHead();
+              } else {
+                rt.current_track = rt.start_track;
+              }
+            break;
+            case "next":
+              nh.next(rt);
+            break;
+            case "ended":
+              nh.next(rt);
+            break;
+            case "jumped":
+              if (rt.playlist.indexOf(rt.player.track) != 0) {
+                rt.moveCurrentTrackToHead();
+              }
+            case "shuffle":
+              rt.player.shuffle = false;
+            break;
+          }          
+        }
+
+        var blob = new Blob([document.querySelector('#worker').textContent]);
+
+        var worker = new Worker(window.URL.createObjectURL(blob));
+        worker.onmessage = function(e) {
+          respond(e,rt);
+        }
+
+        var detonateThisButton = document.getElementById('detonate-this');
+        detonateThisButton.addEventListener('click', detonateThis);
+
+        var detonateAllButton = document.getElementById('detonate-this');
+        detonateAllButton.addEventListener('click', detonateAll);
+
+        function detonateThis() {
+          localStorage.removeItem(rt.orig_playlist.data.uri);
+        }
+        function detonateAll() {
+          localStorage.clear();
+        }
       </script>
     </div>
   </div>
