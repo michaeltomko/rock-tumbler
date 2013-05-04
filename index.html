@@ -124,6 +124,7 @@
             _this.playlist = new models.Playlist();
             _this.played_list = new models.Playlist();
             _this.track_array = [];
+            _this.played_tracks_array = [];
             _this.local_storage = getLocalStorage();
             _this.r = new RandomizerArray(_this.orig_playlist.length);
             return true;
@@ -140,6 +141,7 @@
               track_uri = _this.orig_playlist.get(value).data.uri;
               if (_.contains(_this.local_storage,track_uri.replace("spotify:track:",""))) {
                 _this.played_list.add(models.Track.fromURI(track_uri));
+                _this.played_tracks_array.push(track_uri);
               } else {
                 _this.playlist.add(models.Track.fromURI(track_uri));
                 _this.track_array.push(track_uri);
@@ -155,6 +157,7 @@
             localStorage[_this.orig_playlist.data.uri] = _this.local_storage;
             _this.playlist.remove(track);
             _this.played_list.add(track);
+            _this.played_tracks_array.push(track);
             if (_this.player.track) _this.current_track = _this.player.track;
             return true;
           }
@@ -214,29 +217,30 @@
 
         function RockTumblerObservers(rt,rtUI,models) {
           rt.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-            _(diffBetweenPlaylists(rt.playlist,rt.orig_playlist,rt.played_list)).each(function(track){
-              rt.playlist.remove(track);
-              i = _.indexOf(rt.track_array,track,true);
-              rt.track_array.splice(i,1);
+            var in_playlist,i;
+            _.each(diffBetweenPlaylists(rt.playlist,rt.orig_playlist,rt.played_list),function(track){   
+                rt.playlist.remove(track);
+                i = _.indexOf(rt.track_array,track,true);
+                rt.track_array.splice(i,1);             
             });
-
-            //rtUI.setContext();
+            _.each(diffBetweenPlaylists(rt.played_list,rt.orig_playlist,rt.playlist),function(track){
+                rt.played_list.remove(track);
+                i = _.indexOf(rt.played_tracks_array,track,true);
+                rt.played_tracks_array.splice(i,1);
+            });
           });
+
           rt.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            _(diffBetweenPlaylists(rt.orig_playlist,rt.playlist,rt.played_list)).each(function(track){
+            _.each(diffBetweenPlaylists(rt.orig_playlist,rt.playlist,rt.played_list),function(track){
               rt.playlist.add(track);
               rt.track_array.push(track);
             });
-
-            //rtUI.setContext();
           });
 
           rt.playlist.observe(models.EVENT.CHANGE, function(event) {
-            //rtUI.setContext();
           });
 
           rt.played_list.observe(models.EVENT.CHANGE, function(event) {
-            //rtUI.setContext();
           });
 
           rt.player.observe(models.EVENT.CHANGE, function(event) {
@@ -255,9 +259,9 @@
         //TODO: Modify drop. Refactor. 
 
         function diffBetweenPlaylists(main,comp1,comp2) {
-          main = _(main.tracks).map(function(track){return track.data.uri});
-          comp1 = _(comp1.tracks).map(function(track){return track.data.uri}) || [];
-          comp2 = _(comp2.tracks).map(function(track){return track.data.uri}) || [];
+          main = _.map(main.tracks,function(track){return track.data.uri});
+          comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
+          comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
           return _.difference(main,comp1,comp2);
         }
 
