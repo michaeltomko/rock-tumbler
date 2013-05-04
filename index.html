@@ -58,7 +58,7 @@
       <hr>
       <input type="button" id="detonate-this" value="Detonate This Playlist">
       <input type="button" id="detonate-all" value="Detonate All Playlists">
-      <script src="/js/underscore-min.js"></script>
+      <script src="/js/lodash.min.js"></script>
       <script id="worker" type="javascript/worker">
         var msg;
         self.onmessage = function(event) {
@@ -239,7 +239,7 @@
           });
 
           rt.player.observe(models.EVENT.CHANGE, function(event) {
-            worker.postMessage(_.chain(event.data).pairs().object().value());
+            worker.postMessage(_(event.data).pairs().object().value());
           });
           return true;
         }
