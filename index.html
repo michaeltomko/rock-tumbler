@@ -91,7 +91,7 @@
         function NextHandler(timeout) {
           var _this = this,count,to_remove;
 
-          var eventTimeoutId;
+          var eventTimeoutId,count,i;
           this.indexCounter = 0;
           this.timeoutThreshold = timeout;
 
@@ -169,6 +169,7 @@
             _this.playlist.data.move(_this.player.track.data.uri,0);
             _this.current_track = _this.playlist.get(0);
             _this.expireTrack(_this.playlist.get(1).uri);
+            _this.track_array.splice(1,1);
             return true;
           }
 
