@@ -7,7 +7,41 @@
   <link rel="stylesheet" type="text/css" href="sp://resources/css/list.css">
 
   <!-- Project CSS files -->
-  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <style>
+    /* Main Elements */
+    html {-webkit-user-select: auto;}
+    body {min-height: 100%;padding: 10px 0 20px;box-sizing: border-box;}
+    #wrapper {position: relative;z-index: 2;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
+    section {position: relative;overflow: hidden;margin: 0 0 40px;}
+    .breadcrumb, .gist {margin: 0 0 20px;}
+    .right {float:right;}
+    h3 + div {margin: 0 0 35px;}
+
+
+    /* Headers */
+    #index h1 {background-image:url('/img/spotify-apps-tutorial.png');background-repeat: no-repeat;width:600px;height:83px;text-indent:-9999em;}
+
+
+    /* Text */
+    h1 {font-size:2em;}
+    .description {font-size:1.5em;font-style:italic;font-family:Georgia;padding:0 0 25px;line-height:25px;}
+
+
+    /* Player */
+    #player {min-height:140px; float:right;}
+    #player .sp-player {float:left;width:250px;height:250px;}
+    #player .sp-list {width:inherit;max-height:inherit;}
+
+    /* Drop Box */
+    #drop_box {float:left;width:600px;border:4px dashed #333;height:222px;padding:10px;}
+    #drop_box.over {opacity:0.8;border-color:#74c043;}
+
+    /* Index */
+    #index h1, #index ul {margin:0 0 30px;}
+    #index a:hover {color:#83be20;}
+
+    .clearfix {clear:both;}
+  </style>    
   <link rel="stylesheet" type="text/css" href="css/github.css">
 </head>
 <body>
@@ -24,7 +58,8 @@
       <hr>
       <input type="button" id="detonate-this" value="Detonate This Playlist">
       <input type="button" id="detonate-all" value="Detonate All Playlists">
-      <script src="/js/underscore-min.js"></script>
+      <script src="/js/lodash.min.js"></script>
+      <script src="/js/log.js"></script>
       <script id="worker" type="javascript/worker">
         var msg;
         self.onmessage = function(event) {
@@ -52,11 +87,11 @@
           this.result = _.shuffle(_.range(this.length));
           return true;
         }
-        
+
         function NextHandler(timeout) {
           var _this = this,count,to_remove;
 
-          var eventTimeoutId;
+          var eventTimeoutId,count,i;
           this.indexCounter = 0;
           this.timeoutThreshold = timeout;
 
@@ -89,6 +124,7 @@
             _this.playlist = new models.Playlist();
             _this.played_list = new models.Playlist();
             _this.track_array = [];
+            _this.played_tracks_array = [];
             _this.local_storage = getLocalStorage();
             _this.r = new RandomizerArray(_this.orig_playlist.length);
             return true;
@@ -105,6 +141,7 @@
               track_uri = _this.orig_playlist.get(value).data.uri;
               if (_.contains(_this.local_storage,track_uri.replace("spotify:track:",""))) {
                 _this.played_list.add(models.Track.fromURI(track_uri));
+                _this.played_tracks_array.push(track_uri);
               } else {
                 _this.playlist.add(models.Track.fromURI(track_uri));
                 _this.track_array.push(track_uri);
@@ -120,6 +157,7 @@
             localStorage[_this.orig_playlist.data.uri] = _this.local_storage;
             _this.playlist.remove(track);
             _this.played_list.add(track);
+            _this.played_tracks_array.push(track);
             if (_this.player.track) _this.current_track = _this.player.track;
             return true;
           }
@@ -130,13 +168,15 @@
             _this.track_array.unshift(_.first(t));
             _this.playlist.data.move(_this.player.track.data.uri,0);
             _this.current_track = _this.playlist.get(0);
+            _this.expireTrack(_this.playlist.get(1).uri);
+            _this.track_array.splice(1,1);
             return true;
           }
 
           function getLocalStorage() {
             if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
-            localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
-            localStorage.removeItem(rt.orig_playlist.name);
+              localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
+              localStorage.removeItem(rt.orig_playlist.name);
             }
             return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
           }
@@ -179,33 +219,35 @@
 
         function RockTumblerObservers(rt,rtUI,models) {
           rt.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-            _(diffBetweenPlaylists(rt.playlist,rt.orig_playlist,rt.played_list)).each(function(track){
-              rt.playlist.remove(track);
-              i = _.indexOf(rt.track_array,track,true);
-              rt.track_array.splice(i,1);
+            var in_playlist,i;
+            _.each(diffBetweenPlaylists(rt.playlist,rt.orig_playlist,rt.played_list),function(track){   
+                rt.playlist.remove(track);
+                i = _.indexOf(rt.track_array,track,true);
+                rt.track_array.splice(i,1);             
             });
-
-            //rtUI.setContext();
+            _.each(diffBetweenPlaylists(rt.played_list,rt.orig_playlist,rt.playlist),function(track){
+                rt.played_list.remove(track);
+                i = _.indexOf(rt.played_tracks_array,track,true);
+                rt.played_tracks_array.splice(i,1);
+            });
           });
+
           rt.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            _(diffBetweenPlaylists(rt.orig_playlist,rt.playlist,rt.played_list)).each(function(track){
+            _.each(diffBetweenPlaylists(rt.orig_playlist,rt.playlist,rt.played_list),function(track){
               rt.playlist.add(track);
               rt.track_array.push(track);
             });
-
-            //rtUI.setContext();
           });
 
           rt.playlist.observe(models.EVENT.CHANGE, function(event) {
-            //rtUI.setContext();
           });
 
           rt.played_list.observe(models.EVENT.CHANGE, function(event) {
-            //rtUI.setContext();
           });
 
           rt.player.observe(models.EVENT.CHANGE, function(event) {
-            worker.postMessage(_.chain(event.data).pairs().object().value());
+            log(event);
+            worker.postMessage(_(event.data).pairs().object().value());
           });
           return true;
         }
@@ -216,12 +258,10 @@
 
         var rt = new RockTumbler();
 
-        //TODO: Modify drop. Refactor. 
-
         function diffBetweenPlaylists(main,comp1,comp2) {
-          main = _(main.tracks).map(function(track){return track.data.uri});
-          comp1 = _(comp1.tracks).map(function(track){return track.data.uri}) || [];
-          comp2 = _(comp2.tracks).map(function(track){return track.data.uri}) || [];
+          main = _.map(main.tracks,function(track){return track.data.uri});
+          comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
+          comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
           return _.difference(main,comp1,comp2);
         }
 
@@ -278,10 +318,10 @@
           switch (e.data) {
             case "initial":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
-                rt.moveCurrentTrackToHead();
-              } else {
-                rt.current_track = rt.start_track;
-              }
+              rt.moveCurrentTrackToHead();
+            } else {
+              rt.current_track = rt.start_track;
+            }
             break;
             case "next":
               nh.next(rt);
@@ -291,8 +331,8 @@
             break;
             case "jumped":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
-                rt.moveCurrentTrackToHead();
-              }
+              rt.moveCurrentTrackToHead();
+            }
             case "shuffle":
               rt.player.shuffle = false;
             break;
