@@ -67,10 +67,10 @@
             msg = "initial";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate) {
             msg = "play/pause";
-          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
-            msg = "next";
           } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
             msg = "ended";
+          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "next";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate) {
             msg = "previous";
           } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
@@ -106,6 +106,12 @@
             _this.indexCounter = 0;
             to_remove = rt.track_array.splice(0,count);
             _.each(to_remove, function(track){rt.expireTrack(track);});
+          }
+
+          this.end = function(rt) {
+            rt.playlist.remove(_.first(rt.track_array));
+            localStorage.removeItem(rt.orig_playlist.data.uri);
+            delete rt;
           }
         }
 
@@ -329,7 +335,8 @@
               nh.next(rt);
             break;
             case "ended":
-              nh.next(rt);
+              log("ended");
+              nh.end(rt);
             break;
             case "jumped":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
