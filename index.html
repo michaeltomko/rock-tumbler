@@ -7,7 +7,41 @@
   <link rel="stylesheet" type="text/css" href="sp://resources/css/list.css">
 
   <!-- Project CSS files -->
-  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <style>
+    /* Main Elements */
+    html {-webkit-user-select: auto;}
+    body {min-height: 100%;padding: 10px 0 20px;box-sizing: border-box;}
+    #wrapper {position: relative;z-index: 2;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
+    section {position: relative;overflow: hidden;margin: 0 0 40px;}
+    .breadcrumb, .gist {margin: 0 0 20px;}
+    .right {float:right;}
+    h3 + div {margin: 0 0 35px;}
+
+
+    /* Headers */
+    #index h1 {background-image:url('/img/spotify-apps-tutorial.png');background-repeat: no-repeat;width:600px;height:83px;text-indent:-9999em;}
+
+
+    /* Text */
+    h1 {font-size:2em;}
+    .description {font-size:1.5em;font-style:italic;font-family:Georgia;padding:0 0 25px;line-height:25px;}
+
+
+    /* Player */
+    #player {min-height:140px; float:right;}
+    #player .sp-player {float:left;width:250px;height:250px;}
+    #player .sp-list {width:inherit;max-height:inherit;}
+
+    /* Drop Box */
+    #drop_box {float:left;width:600px;border:4px dashed #333;height:222px;padding:10px;}
+    #drop_box.over {opacity:0.8;border-color:#74c043;}
+
+    /* Index */
+    #index h1, #index ul {margin:0 0 30px;}
+    #index a:hover {color:#83be20;}
+
+    .clearfix {clear:both;}
+  </style>    
   <link rel="stylesheet" type="text/css" href="css/github.css">
 </head>
 <body>
@@ -52,7 +86,7 @@
           this.result = _.shuffle(_.range(this.length));
           return true;
         }
-        
+
         function NextHandler(timeout) {
           var _this = this,count,to_remove;
 
@@ -135,8 +169,8 @@
 
           function getLocalStorage() {
             if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
-            localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
-            localStorage.removeItem(rt.orig_playlist.name);
+              localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
+              localStorage.removeItem(rt.orig_playlist.name);
             }
             return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
           }
@@ -278,10 +312,10 @@
           switch (e.data) {
             case "initial":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
-                rt.moveCurrentTrackToHead();
-              } else {
-                rt.current_track = rt.start_track;
-              }
+              rt.moveCurrentTrackToHead();
+            } else {
+              rt.current_track = rt.start_track;
+            }
             break;
             case "next":
               nh.next(rt);
@@ -291,8 +325,8 @@
             break;
             case "jumped":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
-                rt.moveCurrentTrackToHead();
-              }
+              rt.moveCurrentTrackToHead();
+            }
             case "shuffle":
               rt.player.shuffle = false;
             break;
