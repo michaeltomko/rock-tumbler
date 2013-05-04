@@ -168,6 +168,7 @@
             _this.track_array.unshift(_.first(t));
             _this.playlist.data.move(_this.player.track.data.uri,0);
             _this.current_track = _this.playlist.get(0);
+            _this.expireTrack(_this.playlist.get(1).uri);
             return true;
           }
 
@@ -255,8 +256,6 @@
         var views = sp.require("$api/views");
 
         var rt = new RockTumbler();
-
-        //TODO: Modify drop. Refactor. 
 
         function diffBetweenPlaylists(main,comp1,comp2) {
           main = _.map(main.tracks,function(track){return track.data.uri});
