@@ -30,9 +30,7 @@ Feel free to contact me at: [tomko@theablefew.com](mailto://tomko@theablefew.com
 
 ## Release History
 * __2013/05/02__ - _0.1.0_ - Initial functional release
+* __2013/05/04__ - _0.1.1_ - Bug fixes. Switched to Lo-Dash.js. Added logger.
 
-## TODO
-* Make it look good.
-* Determine viability of moving to Spotify API 1.x.
-* Experiment with variable track removal timeout based on size of playlist. (Next button race condition still exists for very large playlists.)
-* Add resume last playing track feature for when a playlist is left in the middle of a track.
+----
+The Able Few - [St. Louis Ruby & NodeJS development](http://theablefew.com)
