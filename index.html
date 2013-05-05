@@ -82,42 +82,14 @@
         }
       </script>
       <script>
-        function RandomizerArray(length) {
-          this.length = length;
-          this.result = _.shuffle(_.range(this.length));
-        }
-
-        function NextHandler(timeout) {
-          var _this = this,count,to_remove,eventTimeoutId;
-
-          this.indexCounter = 0;
-          this.timeoutThreshold = timeout;
-
-          this.next = function(rt) {
-            _this.indexCounter++;
-            clearTimeout(eventTimeoutId);
-            eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
-          }
-
-          function onTimeout(rt) {
-            count = _this.indexCounter;
-            _this.indexCounter = 0;
-            to_remove = rt.track_array.splice(0,count);
-            _.each(to_remove, function(track){rt.expireTrack(track);});
-          }
-
-          this.end = function(rt) {
-            rt.playlist.remove(_.first(rt.track_array));
-            localStorage.removeItem(rt.orig_playlist.data.uri);
-            delete rt;
-          }
-        }
-
-        function RockTumbler() {
+        function RockTumblerSession() {
           var _this = this,i,t;
 
           var sp = getSpotifyApi();
           var models = sp.require('$api/models');
+
+          this.ui = new RockTumblerUI();
+          this.ui.setupDropbox();
 
           this.player = models.player;
           this.player.shuffle = false;
@@ -130,7 +102,8 @@
             _this.respond(e);
           }
 
-          this.init = function(orig_playlist) {
+          this.init = function(drop) {
+            orig_playlist = models.Playlist.fromURI(drop);
             _this.orig_playlist = orig_playlist;
             _this.playlist = new models.Playlist();
             _this.played_list = new models.Playlist();
@@ -193,6 +166,8 @@
             });
 
             _this.start_track = _this.playlist.get(0);
+            _this.ui.init(_this);
+            _this.ui.placeHTML();
           }
 
           this.expireTrack = function(track) {
@@ -242,12 +217,25 @@
             }
             return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
           }
+
+          function RandomizerArray(length) {
+            this.length = length;
+            this.result = _.shuffle(_.range(this.length));
+          }
+
+          function diffBetweenPlaylists(main,comp1,comp2) {
+            main = _.map(main.tracks,function(track){return track.data.uri});
+            comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
+            comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
+            return _.difference(main,comp1,comp2);
+          }
         }
 
         function RockTumblerUI() {
-          var _this = this,i;
+          var _this = this;
 
           var sp = getSpotifyApi();
+          var models = sp.require('$api/models');
           var views = sp.require("$api/views");
 
           this.playlist_HTML = document.getElementById('original-tracks-list');
@@ -260,7 +248,7 @@
             _this.played_list = new views.List(_this.session.played_list);
             _this.playlist.track = _this.played_list.track = null;
             _this.player = new views.Player();
-            _this.setContext();
+            setContext();
           }
 
           this.placeHTML = function() {
@@ -270,72 +258,86 @@
             _this.player_HTML.appendChild(_this.player.node);
           }
 
-          this.setContext = function() {
+          function setContext() {
             _this.player.context = _this.playlist.context = _this.session.playlist;
             _this.played_list.context = _this.session.played_list;
           }
+
+          this.setupDropbox = function() {
+            var drop_box = document.querySelector('#drop_box');
+
+            drop_box.addEventListener('dragstart', function(e){
+              e.dataTransfer.setData('text/html', this.innerHTML);
+              e.dataTransfer.effectAllowed = 'copy';
+            }, false);
+
+            drop_box.addEventListener('dragenter', function(e){
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'copy';
+              this.classList.add('over');
+            }, false);
+
+            drop_box.addEventListener('dragover', function(e){
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'copy';
+              return false;
+            }, false);
+
+            drop_box.addEventListener('dragleave', function(e){
+              e.preventDefault();
+              this.classList.remove('over');
+            }, false);
+
+            drop_box.addEventListener('drop', function(e){
+              e.preventDefault();
+              player.shuffle = false;
+              var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
+              this.classList.remove('over');
+              var success_message = document.createElement('p');
+              success_message.innerHTML = 'Playlist: ' + drop.name;
+              this.appendChild(success_message);
+              setupDroppedPlaylist(drop);
+            }, false);
+          }
         }
 
-        var sp = getSpotifyApi();
-        var models = sp.require('$api/models');
-        var views = sp.require("$api/views");
+        function NextHandler(timeout) {
+          var _this = this,count,to_remove,eventTimeoutId;
 
-        var rt = new RockTumbler();
+          this.indexCounter = 0;
+          this.timeoutThreshold = timeout;
 
-        function diffBetweenPlaylists(main,comp1,comp2) {
-          main = _.map(main.tracks,function(track){return track.data.uri});
-          comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
-          comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
-          return _.difference(main,comp1,comp2);
+          this.next = function(rt) {
+            _this.indexCounter++;
+            clearTimeout(eventTimeoutId);
+            eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
+          }
+
+          function onTimeout(rt) {
+            count = _this.indexCounter;
+            _this.indexCounter = 0;
+            to_remove = rt.track_array.splice(0,count);
+            _.each(to_remove, function(track){rt.expireTrack(track);});
+          }
+
+          this.end = function(rt) {
+            rt.playlist.remove(_.first(rt.track_array));
+            localStorage.removeItem(rt.orig_playlist.data.uri);
+            delete rt;
+          }
         }
+
+        // Setup The Session
+        var rt = new RockTumblerSession();
 
         function setupDroppedPlaylist(drop) {
           if (!typeof(rt)==='undefined') return false;
 
-          rt.init(models.Playlist.fromURI(drop.uri));
+          rt.init(drop.uri);
           rt.setupPlaylists();
-
-          rtUI = new RockTumblerUI();
-          rtUI.init(rt);
-          rtUI.placeHTML();
         }
 
-        // Handle drops
-        var drop_box = document.querySelector('#drop_box');
-
-        drop_box.addEventListener('dragstart', function(e){
-          e.dataTransfer.setData('text/html', this.innerHTML);
-          e.dataTransfer.effectAllowed = 'copy';
-        }, false);
-
-        drop_box.addEventListener('dragenter', function(e){
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'copy';
-          this.classList.add('over');
-        }, false);
-
-        drop_box.addEventListener('dragover', function(e){
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'copy';
-          return false;
-        }, false);
-
-        drop_box.addEventListener('dragleave', function(e){
-          e.preventDefault();
-          this.classList.remove('over');
-        }, false);
-
-        drop_box.addEventListener('drop', function(e){
-          e.preventDefault();
-          player.shuffle = false;
-          var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
-          this.classList.remove('over');
-          var success_message = document.createElement('p');
-          success_message.innerHTML = 'Playlist: ' + drop.name;
-          this.appendChild(success_message);
-          setupDroppedPlaylist(drop);
-        }, false);
-
+        // Detonation Buttons
         var detonateThisButton = document.getElementById('detonate-this');
         detonateThisButton.addEventListener('click', detonateThis);
 
