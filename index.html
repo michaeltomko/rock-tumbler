@@ -161,6 +161,37 @@
               }
             });
 
+            _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
+              var in_playlist,i;
+              _.each(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list),function(track){   
+                _this.playlist.remove(track);
+                i = _.indexOf(_this.track_array,track,true);
+                _this.track_array.splice(i,1);             
+              });
+              _.each(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist),function(track){
+                _this.played_list.remove(track);
+                i = _.indexOf(_this.played_tracks_array,track,true);
+                _this.played_tracks_array.splice(i,1);
+              });
+            });
+
+            _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
+              _.each(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list),function(track){
+                _this.playlist.add(track);
+                _this.track_array.push(track);
+              });
+            });
+
+            _this.playlist.observe(models.EVENT.CHANGE, function(event) {
+            });
+
+            _this.played_list.observe(models.EVENT.CHANGE, function(event) {
+            });
+
+            _this.player.observe(models.EVENT.CHANGE, function(event) {
+              _this.worker.postMessage(_(event.data).pairs().object().value());
+            });
+
             _this.start_track = _this.playlist.get(0);
           }
 
@@ -179,14 +210,6 @@
             _this.playlist.data.move(_this.player.track.data.uri,0);
             _this.expireTrack(_this.playlist.get(1).uri);
             _this.track_array.splice(1,1);
-          }
-
-          function getLocalStorage() {
-            if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
-              localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
-              localStorage.removeItem(rt.orig_playlist.name);
-            }
-            return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
           }
 
           this.respond = function(e) {
@@ -210,6 +233,14 @@
                 _this.player.shuffle = false;
               break;
             }          
+          }
+
+          function getLocalStorage() {
+            if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
+              localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
+              localStorage.removeItem(_this.orig_playlist.name);
+            }
+            return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
           }
         }
 
@@ -245,39 +276,6 @@
           }
         }
 
-        function RockTumblerObservers(rt,rtUI,models) {
-          rt.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-            var in_playlist,i;
-            _.each(diffBetweenPlaylists(rt.playlist,rt.orig_playlist,rt.played_list),function(track){   
-              rt.playlist.remove(track);
-              i = _.indexOf(rt.track_array,track,true);
-              rt.track_array.splice(i,1);             
-            });
-            _.each(diffBetweenPlaylists(rt.played_list,rt.orig_playlist,rt.playlist),function(track){
-              rt.played_list.remove(track);
-              i = _.indexOf(rt.played_tracks_array,track,true);
-              rt.played_tracks_array.splice(i,1);
-            });
-          });
-
-          rt.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            _.each(diffBetweenPlaylists(rt.orig_playlist,rt.playlist,rt.played_list),function(track){
-              rt.playlist.add(track);
-              rt.track_array.push(track);
-            });
-          });
-
-          rt.playlist.observe(models.EVENT.CHANGE, function(event) {
-          });
-
-          rt.played_list.observe(models.EVENT.CHANGE, function(event) {
-          });
-
-          rt.player.observe(models.EVENT.CHANGE, function(event) {
-            rt.worker.postMessage(_(event.data).pairs().object().value());
-          });
-        }
-
         var sp = getSpotifyApi();
         var models = sp.require('$api/models');
         var views = sp.require("$api/views");
@@ -300,7 +298,6 @@
           rtUI = new RockTumblerUI();
           rtUI.init(rt);
           rtUI.placeHTML();
-          RockTumblerObservers(rt,rtUI,models);  
         }
 
         // Handle drops
