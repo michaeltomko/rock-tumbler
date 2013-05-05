@@ -319,7 +319,6 @@
           this.end = function(rt) {
             rt.playlist.remove(_.first(rt.track_array));
             localStorage.removeItem(rt.orig_playlist.data.uri);
-            delete rt;
           }
         }
 
