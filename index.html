@@ -8,24 +8,63 @@
 
   <!-- Project CSS files -->
   <style>
+    @font-face {
+      font-family: 'MenschRegular';
+      src: url('fonts/mensch-wf.eot');
+      src: url('fonts/mensch-wf.eot?#iefix') format('embedded-opentype'),
+      url('fonts/mensch-wf.woff') format('woff'),
+      url('fonts/mensch-wf.ttf') format('truetype'),
+      url('fonts/mensch-wf.svg#MenschMenschRegular') format('svg');
+      font-weight: normal;
+      font-style: normal;
+
+    }
+
+    @font-face {
+      font-family: 'MenschBold';
+      src: url('fonts/mensch-bold-wf.eot');
+      src: url('fonts/mensch-bold-wf.eot?#iefix') format('embedded-opentype'),
+      url('fonts/mensch-bold-wf.woff') format('woff'),
+      url('fonts/mensch-bold-wf.ttf') format('truetype'),
+      url('fonts/mensch-bold-wf.svg#MenschMenschBold') format('svg');
+      font-weight: normal;
+      font-style: normal;
+
+    }
+
+    @font-face {
+      font-family: 'fonts/MenschBoldInline';
+      src: url('fonts/mensch-inline-wf.eot');
+      src: url('fonts/mensch-inline-wf.eot?#iefix') format('embedded-opentype'),
+      url('fonts/mensch-inline-wf.woff') format('woff'),
+      url('fonts/mensch-inline-wf.ttf') format('truetype'),
+      url('fonts/mensch-inline-wf.svg#MenschMenschBoldInline') format('svg');
+      font-weight: normal;
+      font-style: normal;
+
+    }
+
+    @font-face {
+      font-family: 'MenschThin';
+      src: url('fonts/mensch-thin-wf.eot');
+      src: url('fonts/mensch-thin-wf.eot?#iefix') format('embedded-opentype'),
+      url('fonts/mensch-thin-wf.woff') format('woff'),
+      url('fonts/mensch-thin-wf.ttf') format('truetype'),
+      url('fonts/mensch-thin-wf.svg#MenschMenschThin') format('svg');
+      font-weight: normal;
+      font-style: normal;
+
+    }
+
     /* Main Elements */
     html {-webkit-user-select: auto;}
-    body {min-height: 100%;padding: 10px 0 20px;box-sizing: border-box;}
-    #wrapper {position: relative;z-index: 2;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
-    section {position: relative;overflow: hidden;margin: 0 0 40px;}
-    .breadcrumb, .gist {margin: 0 0 20px;}
-    .right {float:right;}
-    h3 + div {margin: 0 0 35px;}
-
-
-    /* Headers */
-    #index h1 {background-image:url('/img/spotify-apps-tutorial.png');background-repeat: no-repeat;width:600px;height:83px;text-indent:-9999em;}
-
+    body {min-height: 100%;padding: 10px 0 20px;box-sizing: border-box; background-image:url(img/squairy_light_@2X.png); background-size:200px 200px; color:rgba(75, 75, 75, 0.8); font-family:"Lucida Grande", "Tahoma", "Arial", sans-serif; text-rendering: optimizeLegibility;-webkit-transform: translate3d(0,0,0);-moz-transform: translate3d(0,0,0);-ms-transform: translate3d(0,0,0);-o-transform: translate3d(0,0,0);transform: translate3d(0,0,0);}
+    #wrapper {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
+    #header {text-align:center;}
+    #buttons {text-align:center;margin-top:150px;}
 
     /* Text */
-    h1 {font-size:2em;}
-    .description {font-size:1.5em;font-style:italic;font-family:Georgia;padding:0 0 25px;line-height:25px;}
-
+    h1 {font-size:12.7em; line-height:1; font-family:'MenschBoldInline';color:rgba(231, 71, 68, 0.8);}
 
     /* Player */
     #player {min-height:140px; float:right;}
@@ -33,31 +72,146 @@
     #player .sp-list {width:inherit;max-height:inherit;}
 
     /* Drop Box */
-    #drop_box {float:left;width:600px;border:4px dashed #333;height:222px;padding:10px;}
-    #drop_box.over {opacity:0.8;border-color:#74c043;}
+    #drop_box {float:left;width:600px;border:4px dashed rgba(75, 75, 75, 0.8);height:222px;padding:10px;}
+    #drop_box.over {border-color:rgba(231, 71, 68, 0.8);}
+    #instructions {color:#a8a8a8;}
 
-    /* Index */
-    #index h1, #index ul {margin:0 0 30px;}
-    #index a:hover {color:#83be20;}
+    #original-tracks-list {margin-top:25px;}
+    #played-tracks-list {margin:25px 0;}
+    .sp-player-image {border-radius:0;box-shadow:none;}
+    .sp-player-image,.sp-list {opacity:0.8;}
+    .sp-player-image:hover,.sp-list:hover {
+      opacity:1;
+      -webkit-transition: all 0.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
+      -moz-transition: all 0.3s ease-out;  /* Firefox 4-15 */
+      -o-transition: all 0.3s ease-out;  /* Opera 10.50–12.00 */
+      transition: all 0.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.10+ */
+    }
+
+    .sp-list .sp-item {
+      color:#e3e3e3;
+    }
+
+    .sp-player.sp-player-paused .sp-player-button {
+      display:block;
+    }
 
     .clearfix {clear:both;}
+
+    .btn {
+      display: inline-block;
+      padding: 6px 12px;
+      margin-bottom: 0;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      border: 1px solid rgba(168, 168, 168, 0.8);
+    }
+
+    .btn:focus {
+      outline: thin dotted #333;
+      outline: 5px auto -webkit-focus-ring-color;
+      outline-offset: -2px;
+    }
+
+    .btn:hover,
+    .btn:focus {
+      color: #fdfdfd;
+      text-decoration: none;
+    }
+
+    .btn:active,
+    .btn.active {
+      background-image: none;
+      outline: 0;
+      -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    }
+
+    .btn.disabled,
+    .btn[disabled],
+    fieldset[disabled] .btn {
+      pointer-events: none;
+      cursor: default;
+      opacity: 0.65;
+      filter: alpha(opacity=65);
+      -webkit-box-shadow: none;
+      box-shadow: none;
+    }
+
+    .btn-large {
+      padding: 11px 14px;
+      font-size: 17.5px;
+    }
+
+    .btn-small {
+      padding: 2px 10px;
+      font-size: 11.9px;
+    }
+
+    .btn-mini {
+      padding: 0 6px;
+      font-size: 10.5px;
+    }
+
+    .btn-block {
+      display: block;
+      width: 100%;
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    .btn-block + .btn-block {
+      margin-top: 5px;
+    }
+
+    input[type="submit"].btn-block,
+    input[type="reset"].btn-block,
+    input[type="button"].btn-block {
+      width: 100%;
+    }
+
+    .btn {
+      color: #ececec;
+      background-color: rgba(168, 168, 168, 0.8);
+      border-color: rgba(168, 168, 168, 0.8);
+    }
+
+    .btn:hover,
+    .btn:focus,
+    .btn:active,
+    .btn.active {
+      background-color: rgba(159, 159, 159, 0.8);
+      border-color: rgba(142, 142, 142, 0.8);
+      -webkit-transition: all 0.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
+      -moz-transition: all 0.3s ease-out;  /* Firefox 4-15 */
+      -o-transition: all 0.3s ease-out;  /* Opera 10.50–12.00 */
+      transition: all 0.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.10+ */
+    }
   </style>    
-  <link rel="stylesheet" type="text/css" href="css/github.css">
 </head>
 <body>
   <div id="wrapper">
     <div id="index" class="section">
-      <h2>Rock Tumbler</h2>
-      <div id="drop_box" class=""></div>
+      <div id="header">
+        <h1>Rock Tumbler</h1>
+      </div>
+      <div id="drop_box" class=""><p id="instructions">Drop any playlist here to get started.</p></div>
       <div id="player"></div>
       <div class="clearfix"></div>
-      <hr>
       <div id="original-tracks-list"></div>
-      <hr>
       <div id="played-tracks-list"></div>
-      <hr>
-      <input type="button" id="detonate-this" value="Detonate This Playlist">
-      <input type="button" id="detonate-all" value="Detonate All Playlists">
+      <div id="buttons">
+        <p>By <a href="http://tomkobombco.com">Michael Tomko</a> of <a href="http://theablefew.com">The Able Few</a></p>
+        <p>Textures: <a href="http://subtlepatterns.com">Subtle Patterns</a></p>
+        <p>Fonts: <a href="http://losttype.com">LostType</a></p>
+      <input type="button" class="btn btn-mini" id="detonate-this" value="Detonate This Playlist">
+      <input type="button" class="btn btn-mini" id="detonate-all" value="Detonate All Playlists">
+      </div>
       <script src="/js/lodash.min.js"></script>
       <script src="/js/log.js"></script>
       <script id="worker" type="javascript/worker">
@@ -83,272 +237,282 @@
       </script>
       <script>
         // Session Object
-        function RockTumblerSession() {
-          var _this = this,i,t;
+      function RockTumblerSession() {
+        var _this = this,i,t;
 
-          this.ui = new RockTumblerUI();
-          this.ui.setupDropbox();
+        this.ui = new RockTumblerUI();
+        this.ui.setupDropbox();
 
-          this.player = models.player;
-          this.player.shuffle = false;
-          this.start_track = null;
+        this.player = models.player;
+        this.player.shuffle = false;
+        this.start_track = null;
 
-          var blob = new Blob([document.querySelector('#worker').textContent]);
-          this.worker = new Worker(window.URL.createObjectURL(blob));
+        var blob = new Blob([document.querySelector('#worker').textContent]);
+        this.worker = new Worker(window.URL.createObjectURL(blob));
 
-          this.worker.onmessage = function(e) {
-            _this.respond(e);
-          }
+        this.worker.onmessage = function(e) {
+          _this.respond(e);
+        }
 
-          this.init = function(drop) {
-            orig_playlist = models.Playlist.fromURI(drop);
-            _this.orig_playlist = orig_playlist;
-            _this.playlist = new models.Playlist();
-            _this.played_list = new models.Playlist();
-            _this.track_array = [];
-            _this.played_tracks_array = [];
+        this.init = function(drop) {
+          orig_playlist = models.Playlist.fromURI(drop);
+          _this.orig_playlist = orig_playlist;
+          _this.playlist = new models.Playlist();
+          _this.played_list = new models.Playlist();
+          _this.track_array = [];
+          _this.played_tracks_array = [];
+          _this.local_storage = getLocalStorage();
+          _this.r = new RandomizerArray(_this.orig_playlist.length);
+          _this.n = new NextHandler(500);
+        }
+
+        this.setupPlaylists = function() {
+          var track_uri;
+          if (_this.local_storage.length==_this.orig_playlist.length) {
+            localStorage.removeItem(_this.orig_playlist.data.uri);
             _this.local_storage = getLocalStorage();
-            _this.r = new RandomizerArray(_this.orig_playlist.length);
-            _this.n = new NextHandler(500);
           }
 
-          this.setupPlaylists = function() {
-            var track_uri;
-            if (_this.local_storage.length==_this.orig_playlist.length) {
-              localStorage.removeItem(_this.orig_playlist.data.uri);
-              _this.local_storage = getLocalStorage();
-            }
-
-            _(_this.r.result).each(function(value){
-              track_uri = _this.orig_playlist.get(value).data.uri;
-              if (_.contains(_this.local_storage,track_uri.replace("spotify:track:","")) && !_.contains(_this.played_tracks_array,track_uri)) {
-                _this.played_list.add(models.Track.fromURI(track_uri));
-                _this.played_tracks_array.push(track_uri);
-              } else {
-                if (!_.contains(_this.track_array,track_uri)) {
-                  _this.playlist.add(models.Track.fromURI(track_uri));
-                  _this.track_array.push(track_uri);
-                }
+          _(_this.r.result).each(function(value){
+            track_uri = _this.orig_playlist.get(value).data.uri;
+            if (_.contains(_this.local_storage,track_uri.replace("spotify:track:","")) && !_.contains(_this.played_tracks_array,track_uri)) {
+              _this.played_list.add(models.Track.fromURI(track_uri));
+              _this.played_tracks_array.push(track_uri);
+            } else {
+              if (!_.contains(_this.track_array,track_uri)) {
+                _this.playlist.add(models.Track.fromURI(track_uri));
+                _this.track_array.push(track_uri);
               }
+            }
+          });
+          
+          _this.start_length = _this.track_array.length;
+
+          _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
+            var in_playlist,i;
+            _.each(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list),function(track){   
+              _this.playlist.remove(track);
+              i = _.indexOf(_this.track_array,track,true);
+              _this.track_array.splice(i,1);             
             });
-
-            _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-              var in_playlist,i;
-              _.each(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list),function(track){   
-                _this.playlist.remove(track);
-                i = _.indexOf(_this.track_array,track,true);
-                _this.track_array.splice(i,1);             
-              });
-              _.each(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist),function(track){
-                _this.played_list.remove(track);
-                i = _.indexOf(_this.played_tracks_array,track,true);
-                _this.played_tracks_array.splice(i,1);
-              });
+            _.each(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist),function(track){
+              _this.played_list.remove(track);
+              i = _.indexOf(_this.played_tracks_array,track,true);
+              _this.played_tracks_array.splice(i,1);
             });
+          });
 
-            _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-              _.each(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list),function(track){
-                _this.playlist.add(track);
-                _this.track_array.push(track);
-              });
+          _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
+            _.each(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list),function(track){
+              _this.playlist.add(track);
+              _this.track_array.push(track);
             });
+          });
 
-            _this.playlist.observe(models.EVENT.CHANGE, function(event) {
-            });
+          _this.playlist.observe(models.EVENT.CHANGE, function(event) {
+          });
 
-            _this.played_list.observe(models.EVENT.CHANGE, function(event) {
-            });
+          _this.played_list.observe(models.EVENT.CHANGE, function(event) {
+          });
 
-            _this.player.observe(models.EVENT.CHANGE, function(event) {
-              _this.worker.postMessage(_(event.data).pairs().object().value());
-            });
+          _this.player.observe(models.EVENT.CHANGE, function(event) {
+            _this.worker.postMessage(_(event.data).pairs().object().value());
+          });
 
-            _this.start_track = _this.playlist.get(0);
-            _this.ui.init(_this);
-            _this.ui.placeHTML();
-          }
+          _this.ui.init(_this);
+          _this.ui.placeHTML();
+          _this.start_track = _this.playlist.get(0);
+          _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
+        }
 
-          this.expireTrack = function(track) {
-            _this.local_storage.push(track.replace("spotify:track:",""));
-            localStorage[_this.orig_playlist.data.uri] = _this.local_storage;
-            _this.playlist.remove(track);
-            _this.played_list.add(track);
-            _this.played_tracks_array.push(track);
-          }
+        this.expireTrack = function(track) {
+          _this.local_storage.push(track.replace("spotify:track:",""));
+          localStorage[_this.orig_playlist.data.uri] = _this.local_storage;
+          _this.playlist.remove(track);
+          _this.played_list.add(track);
+          _this.played_tracks_array.push(track);
+        }
 
-          this.moveCurrentTrackToHead = function() {
-            i = _this.playlist.indexOf(_this.player.track.data.uri);
-            t = _this.track_array.splice(i,1);
-            _this.track_array.unshift(_.first(t));
-            _this.playlist.data.move(_this.player.track.data.uri,0);
+        this.moveCurrentTrackToHead = function() {
+          i = _this.playlist.indexOf(_this.player.track.data.uri);
+          t = _this.track_array.splice(i,1);
+          _this.track_array.unshift(_.first(t));
+          _this.playlist.data.move(_this.player.track.data.uri,0);
+          if (_this.track_array.length != _this.start_length) {
             _this.expireTrack(_this.playlist.get(1).uri);
             _this.track_array.splice(1,1);
           }
+        }
 
-          this.respond = function(e) {
-            switch (e.data) {
-              case "initial":
-                if (_this.playlist.indexOf(_this.player.track) != 0) {
-                _this.moveCurrentTrackToHead();
-              }
-              break;
-              case "next":
-                _this.n.next(_this);
-              break;
-              case "ended":
-                _this.n.end(_this);
-              break;
-              case "jumped":
-                if (_this.playlist.indexOf(_this.player.track) != 0) {
-                _this.moveCurrentTrackToHead();
-              }
-              case "shuffle":
-                _this.player.shuffle = false;
-              break;
-            }          
-          }
-
-          function getLocalStorage() {
-            if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
-              localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
-              localStorage.removeItem(_this.orig_playlist.name);
+        this.respond = function(e) {
+          switch (e.data) {
+            case "initial":
+              if (_this.playlist.indexOf(_this.player.track) != 0) {
+              _this.moveCurrentTrackToHead();
+            } else {
+              _this.player.playing = !(_this.player.playing);
             }
-            return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
-          }
-
-          function RandomizerArray(length) {
-            this.length = length;
-            this.result = _.shuffle(_.range(this.length));
-          }
-
-          function diffBetweenPlaylists(main,comp1,comp2) {
-            main = _.map(main.tracks,function(track){return track.data.uri});
-            comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
-            comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
-            return _.difference(main,comp1,comp2);
-          }
+            break;
+            case "next":
+              _this.n.next(_this);
+            break;
+            case "ended":
+              _this.n.end(_this);
+            break;
+            case "jumped":
+              if (_this.playlist.indexOf(_this.player.track) != 0) {
+                _this.moveCurrentTrackToHead();
+              }
+            case "shuffle":
+              _this.player.shuffle = false;
+            break;
+          }          
         }
 
-        // UI Handler
-        function RockTumblerUI() {
-          var _this = this;
-
-          this.playlist_HTML = document.getElementById('original-tracks-list');
-          this.played_list_HTML = document.getElementById('played-tracks-list');
-          this.player_HTML = document.getElementById('player');
-
-          this.init = function(rt) {
-            _this.session = rt;
-            _this.playlist = new views.List(_this.session.playlist);
-            _this.played_list = new views.List(_this.session.played_list);
-            _this.playlist.track = _this.played_list.track = null;
-            _this.player = new views.Player();
-            setContext();
+        function getLocalStorage() {
+          if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
+            localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
+            localStorage.removeItem(_this.orig_playlist.name);
           }
-
-          this.placeHTML = function() {
-            _this.playlist_HTML.innerHTML = _this.played_list_HTML.innerHTML = _this.player_HTML.innerHTML = '';
-            _this.playlist_HTML.appendChild(_this.playlist.node);
-            _this.played_list_HTML.appendChild(_this.played_list.node);
-            _this.player_HTML.appendChild(_this.player.node);
-          }
-
-          this.setupDropbox = function() {
-            var drop_box = document.querySelector('#drop_box');
-
-            drop_box.addEventListener('dragstart', function(e){
-              e.dataTransfer.setData('text/html', this.innerHTML);
-              e.dataTransfer.effectAllowed = 'copy';
-            }, false);
-
-            drop_box.addEventListener('dragenter', function(e){
-              e.preventDefault();
-              e.dataTransfer.dropEffect = 'copy';
-              this.classList.add('over');
-            }, false);
-
-            drop_box.addEventListener('dragover', function(e){
-              e.preventDefault();
-              e.dataTransfer.dropEffect = 'copy';
-              return false;
-            }, false);
-
-            drop_box.addEventListener('dragleave', function(e){
-              e.preventDefault();
-              this.classList.remove('over');
-            }, false);
-
-            drop_box.addEventListener('drop', function(e){
-              e.preventDefault();
-              player.shuffle = false;
-              var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
-              this.classList.remove('over');
-              var success_message = document.createElement('p');
-              success_message.innerHTML = 'Playlist: ' + drop.name;
-              this.appendChild(success_message);
-              setupDroppedPlaylist(drop);
-            }, false);
-          }
-
-          function setContext() {
-            _this.player.context = _this.playlist.context = _this.session.playlist;
-            _this.played_list.context = _this.session.played_list;
-          }
+          return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? localStorage[_this.orig_playlist.data.uri].split(",") : [];
         }
 
-        // Handler for Next Events
-        function NextHandler(timeout) {
-          var _this = this,count,to_remove,eventTimeoutId;
-
-          this.indexCounter = 0;
-          this.timeoutThreshold = timeout;
-
-          this.next = function(rt) {
-            _this.indexCounter++;
-            clearTimeout(eventTimeoutId);
-            eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
-          }
-
-          function onTimeout(rt) {
-            count = _this.indexCounter;
-            _this.indexCounter = 0;
-            to_remove = rt.track_array.splice(0,count);
-            _.each(to_remove, function(track){rt.expireTrack(track);});
-          }
-
-          this.end = function(rt) {
-            rt.playlist.remove(_.first(rt.track_array));
-            localStorage.removeItem(rt.orig_playlist.data.uri);
-            delete rt;
-          }
+        function RandomizerArray(length) {
+          this.length = length;
+          this.result = _.shuffle(_.range(this.length));
         }
 
-        // Setup The Session
-        var sp = getSpotifyApi();
-        var models = sp.require('$api/models');
-        var views = sp.require("$api/views");
-        var rt = new RockTumblerSession();
+        function diffBetweenPlaylists(main,comp1,comp2) {
+          main = _.map(main.tracks,function(track){return track.data.uri});
+          comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
+          comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
+          return _.difference(main,comp1,comp2);
+        }
+      }
 
-        function setupDroppedPlaylist(drop) {
-          if (!typeof(rt)==='undefined') return false;
+      // UI Handler
+      function RockTumblerUI() {
+        var _this = this;
 
-          rt.init(drop.uri);
-          rt.setupPlaylists();
+        this.playlist_HTML = document.getElementById('original-tracks-list');
+        this.played_list_HTML = document.getElementById('played-tracks-list');
+        this.player_HTML = document.getElementById('player');
+
+        this.init = function(rt) {
+          _this.session = rt;
+          _this.playlist = new views.List(_this.session.playlist);
+          _this.played_list = new views.List(_this.session.played_list);
+          _this.playlist.track = _this.played_list.track = null;
+          _this.player = new views.Player();
+          setContext();
         }
 
-        // Detonation Buttons
-        var detonateThisButton = document.getElementById('detonate-this');
-        detonateThisButton.addEventListener('click', detonateThis);
+        this.placeHTML = function() {
+          _this.playlist_HTML.innerHTML = _this.played_list_HTML.innerHTML = _this.player_HTML.innerHTML = '';
+          _this.playlist_HTML.appendChild(_this.playlist.node);
+          _this.played_list_HTML.appendChild(_this.played_list.node);
+          _this.player_HTML.appendChild(_this.player.node);
+        }
 
-        var detonateAllButton = document.getElementById('detonate-this');
-        detonateAllButton.addEventListener('click', detonateAll);
+        this.setupDropbox = function() {
+          var drop_box = document.querySelector('#drop_box');
+          var count = 0;
 
-        function detonateThis() {
+          drop_box.addEventListener('dragstart', function(e){
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            e.dataTransfer.effectAllowed = 'copy';
+          }, false);
+
+          drop_box.addEventListener('dragenter', function(e){
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            this.classList.add('over');
+          }, false);
+
+          drop_box.addEventListener('dragover', function(e){
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            return false;
+          }, false);
+
+          drop_box.addEventListener('dragleave', function(e){
+            e.preventDefault();
+            this.classList.remove('over');
+          }, false);
+
+          drop_box.addEventListener('drop', function(e){
+            e.preventDefault();
+            count++;
+            player.shuffle = false;
+            var instructions = document.getElementById("instructions");
+            if (instructions) this.removeChild(instructions);
+            var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
+            this.classList.remove('over');
+            var success_message = document.createElement('p');
+            success_message.innerHTML = count + '. ' + drop.name;
+            this.appendChild(success_message);
+            setupDroppedPlaylist(drop);
+          }, false);
+        }
+
+        function setContext() {
+          _this.player.context = _this.playlist.context = _this.session.playlist;
+          _this.played_list.context = _this.session.played_list;
+        }
+      }
+
+      // Handler for Next Events
+      function NextHandler(timeout) {
+        var _this = this,count,to_remove,eventTimeoutId;
+
+        this.indexCounter = 0;
+        this.timeoutThreshold = timeout;
+
+        this.next = function(rt) {
+          _this.indexCounter++;
+          clearTimeout(eventTimeoutId);
+          eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
+        }
+
+        function onTimeout(rt) {
+          count = _this.indexCounter;
+          _this.indexCounter = 0;
+          to_remove = rt.track_array.splice(0,count);
+          _.each(to_remove, function(track){rt.expireTrack(track);});
+        }
+
+        this.end = function(rt) {
+          rt.playlist.remove(_.first(rt.track_array));
           localStorage.removeItem(rt.orig_playlist.data.uri);
         }
-        function detonateAll() {
-          localStorage.clear();
-        }
+      }
+
+      // Setup The Session
+      var sp = getSpotifyApi();
+      var models = sp.require('$api/models');
+      var views = sp.require("$api/views");
+      var rt = new RockTumblerSession();
+
+      function setupDroppedPlaylist(drop) {
+        if (!typeof(rt)==='undefined') return false;
+
+        rt.init(drop.uri);
+        rt.setupPlaylists();
+      }
+
+      // Detonation Buttons
+      var detonateThisButton = document.getElementById('detonate-this');
+      detonateThisButton.addEventListener('click', detonateThis);
+
+      var detonateAllButton = document.getElementById('detonate-this');
+      detonateAllButton.addEventListener('click', detonateAll);
+
+      function detonateThis() {
+        localStorage.removeItem(rt.orig_playlist.data.uri);
+      }
+      function detonateAll() {
+        localStorage.clear();
+      }
       </script>
     </div>
   </div>
