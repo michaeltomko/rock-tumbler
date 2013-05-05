@@ -79,27 +79,33 @@
       text-shadow: 3px 3px 3px rgba(231, 71, 68, 0.15);
       -webkit-transition: all 2s ease-out;
        }
-
+    h4 {
+      margin: 0 0 5px;
+      color: rgba(75, 75, 75, 0.9);
+    }
+    #instructions {
+      -webkit-transition: all 0.3s ease-out;
+    }
+    
     /* Player */
     #player {min-height:140px; float:right;}
     #player .sp-player {float:left;width:250px;height:250px;}
     #player .sp-list {width:inherit;max-height:inherit;}
 
     /* Drop Box */
-    #drop_box {float:left;width:600px;border:4px dashed rgba(75, 75, 75, 0.5);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out;}
-    #drop_box.over {border-color:rgba(231, 71, 68, 0.5);-webkit-transition: all 0.75s ease-out;}
-    #instructions {color:#a8a8a8;}
+    #drop_box {float:left;width:600px;border:4px dashed rgba(75, 75, 75, 0.75);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out;}
+    #drop_box.over {border-color:rgba(231, 71, 68, 0.5);-webkit-transition: all 0.65s ease-out;}
 
     #original-tracks-list {margin-top:25px;}
     #played-tracks-list {margin:25px 0;}
     .sp-player-image {border-radius:0;box-shadow:none;}
-    .sp-player-image,.sp-list {opacity:0.85;}
+    .sp-player-image,.sp-list {
+      opacity:0.85;
+      -webkit-transition: all 0.3s ease-out;
+    }
     .sp-player-image:hover,.sp-list:hover {
       opacity:1;
-      -webkit-transition: all 0.3s ease-out;  /* Chrome 1-25, Safari 3.2+ */
-      -moz-transition: all 0.3s ease-out;  /* Firefox 4-15 */
-      -o-transition: all 0.3s ease-out;  /* Opera 10.50–12.00 */
-      transition: all 0.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.10+ */
+      -webkit-transition: all 0.3s ease-out;
     }
 
     .sp-list .sp-item {
@@ -108,6 +114,10 @@
 
     .sp-player.sp-player-paused .sp-player-button {
       display:block;
+    }
+
+    .playlist-entry {
+      text-transform:capitalize;
     }
 
     .clearfix {clear:both;}
@@ -214,7 +224,7 @@
       <div id="header">
         <h1>Rock Tumbler</h1>
       </div>
-      <div id="drop_box" class=""><p id="instructions">Drop any playlist here to get started.</p></div>
+      <div id="drop_box" class=""><h4 id="instructions">Drop any playlist here to get started.</h4></div>
       <div id="player"></div>
       <div class="clearfix"></div>
       <div id="original-tracks-list"></div>
@@ -456,13 +466,21 @@
 
           drop_box.addEventListener('drop', function(e){
             e.preventDefault();
-            count++;
+            
             player.shuffle = false;
             var instructions = document.getElementById("instructions");
             if (instructions) this.removeChild(instructions);
             var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
             this.classList.remove('over');
+            if (count == 0) {
+              var list_title = document.createElement('h4');
+              list_title.className = 'list-title';
+              list_title.innerHTML = 'Playlists:';
+              this.appendChild(list_title);
+            }
+            count++;
             var success_message = document.createElement('p');
+            success_message.className = 'playlist-entry';
             success_message.innerHTML = count + '. ' + drop.name;
             this.appendChild(success_message);
             setupDroppedPlaylist(drop);
