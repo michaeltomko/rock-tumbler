@@ -66,12 +66,12 @@
     /* Text */
     h1 {
       font-size:12.7em;
-      line-height:1.25;
+      line-height:1.15;
       font-family:'MenschBoldInline';
       color:rgba(231, 71, 68, 0.4);
       margin:0;
+      width:100%;
       text-shadow: 3px 3px 3px rgba(231, 71, 68, 0.1);
-      /*text-shadow: rgba(0, 0, 0, .1) .01em .01em, rgba(0, 0, 0, .3) .03em .03em, rgba(0, 0, 0, .5) .04em .04em, rgba(0, 0, 0, .5) .05em .05em, rgba(0, 0, 0, .7) .07em .07em;*/
       -webkit-transition: all 2s ease-out;
     }
     h1:hover {
@@ -91,16 +91,21 @@
     #player {min-height:140px; float:right;}
     #player .sp-player {float:left;width:250px;height:250px;}
     #player .sp-list {width:inherit;max-height:inherit;}
+    #player:empty {width:242px; height:242px; border:4px dashed rgba(75, 75, 75, 0.65);}
 
     /* Drop Box */
-    #drop_box {float:left;width:600px;border:4px dashed rgba(75, 75, 75, 0.75);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out;}
+    #drop_box {float:left;width:600px;border:4px dashed rgba(75, 75, 75, 0.65);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out;}
     #drop_box.over {border-color:rgba(231, 71, 68, 0.5);-webkit-transition: all 0.65s ease-out;}
 
     #original-tracks-list {margin-top:25px;}
     #played-tracks-list {margin:25px 0;}
     .sp-player-image {border-radius:0;box-shadow:none;}
-    .sp-player-image,.sp-list {
+    .sp-player-image {
       opacity:0.85;
+      -webkit-transition: all 0.3s ease-out;
+    }
+    .sp-list {
+      opacity:0.95;
       -webkit-transition: all 0.3s ease-out;
     }
     .sp-player-image:hover,.sp-list:hover {
