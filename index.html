@@ -122,7 +122,7 @@
 
           this.player = models.player;
           this.player.shuffle = false;
-          this.current_track = this.start_track = null;
+          this.start_track = null;
 
           this.init = function(orig_playlist) {
             _this.orig_playlist = orig_playlist;
@@ -165,7 +165,6 @@
             _this.playlist.remove(track);
             _this.played_list.add(track);
             _this.played_tracks_array.push(track);
-            if (_this.player.track) _this.current_track = _this.player.track;
             return true;
           }
 
@@ -174,7 +173,6 @@
             t = _this.track_array.splice(i,1);
             _this.track_array.unshift(_.first(t));
             _this.playlist.data.move(_this.player.track.data.uri,0);
-            _this.current_track = _this.playlist.get(0);
             _this.expireTrack(_this.playlist.get(1).uri);
             _this.track_array.splice(1,1);
             return true;
@@ -193,9 +191,7 @@
               case "initial":
                 if (_this.playlist.indexOf(_this.player.track) != 0) {
                 _this.moveCurrentTrackToHead();
-              } else {
-                _this.current_track = _this.start_track;
-              }
+                }
               break;
               case "next":
                 nh.next(_this);
