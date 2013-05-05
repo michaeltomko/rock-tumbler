@@ -85,7 +85,6 @@
         function RandomizerArray(length) {
           this.length = length;
           this.result = _.shuffle(_.range(this.length));
-          return true;
         }
 
         function NextHandler(timeout) {
@@ -124,6 +123,13 @@
           this.player.shuffle = false;
           this.start_track = null;
 
+          var blob = new Blob([document.querySelector('#worker').textContent]);
+          this.worker = new Worker(window.URL.createObjectURL(blob));
+
+          this.worker.onmessage = function(e) {
+            _this.respond(e);
+          }
+
           this.init = function(orig_playlist) {
             _this.orig_playlist = orig_playlist;
             _this.playlist = new models.Playlist();
@@ -132,7 +138,7 @@
             _this.played_tracks_array = [];
             _this.local_storage = getLocalStorage();
             _this.r = new RandomizerArray(_this.orig_playlist.length);
-            return true;
+            _this.n = new NextHandler(500);
           }
 
           this.setupPlaylists = function() {
@@ -156,7 +162,6 @@
             });
 
             _this.start_track = _this.playlist.get(0);
-            return true;
           }
 
           this.expireTrack = function(track) {
@@ -165,7 +170,6 @@
             _this.playlist.remove(track);
             _this.played_list.add(track);
             _this.played_tracks_array.push(track);
-            return true;
           }
 
           this.moveCurrentTrackToHead = function() {
@@ -175,7 +179,6 @@
             _this.playlist.data.move(_this.player.track.data.uri,0);
             _this.expireTrack(_this.playlist.get(1).uri);
             _this.track_array.splice(1,1);
-            return true;
           }
 
           function getLocalStorage() {
@@ -191,13 +194,13 @@
               case "initial":
                 if (_this.playlist.indexOf(_this.player.track) != 0) {
                 _this.moveCurrentTrackToHead();
-                }
+              }
               break;
               case "next":
-                nh.next(_this);
+                _this.n.next(_this);
               break;
               case "ended":
-                nh.end(_this);
+                _this.n.end(_this);
               break;
               case "jumped":
                 if (_this.playlist.indexOf(_this.player.track) != 0) {
@@ -227,7 +230,6 @@
             _this.playlist.track = _this.played_list.track = null;
             _this.player = new views.Player();
             _this.setContext();
-            return true;
           }
 
           this.placeHTML = function() {
@@ -235,13 +237,11 @@
             _this.playlist_HTML.appendChild(_this.playlist.node);
             _this.played_list_HTML.appendChild(_this.played_list.node);
             _this.player_HTML.appendChild(_this.player.node);
-            return true;
           }
 
           this.setContext = function() {
             _this.player.context = _this.playlist.context = _this.session.playlist;
             _this.played_list.context = _this.session.played_list;
-            return true;
           }
         }
 
@@ -274,10 +274,8 @@
           });
 
           rt.player.observe(models.EVENT.CHANGE, function(event) {
-            log(event);
-            worker.postMessage(_(event.data).pairs().object().value());
+            rt.worker.postMessage(_(event.data).pairs().object().value());
           });
-          return true;
         }
 
         var sp = getSpotifyApi();
@@ -302,8 +300,7 @@
           rtUI = new RockTumblerUI();
           rtUI.init(rt);
           rtUI.placeHTML();
-          RockTumblerObservers(rt,rtUI,models);
-          nh = new NextHandler(500);
+          RockTumblerObservers(rt,rtUI,models);  
         }
 
         // Handle drops
@@ -341,13 +338,6 @@
           this.appendChild(success_message);
           setupDroppedPlaylist(drop);
         }, false);
-
-        var blob = new Blob([document.querySelector('#worker').textContent]);
-
-        var worker = new Worker(window.URL.createObjectURL(blob));
-        worker.onmessage = function(e) {
-          rt.respond(e);
-        }
 
         var detonateThisButton = document.getElementById('detonate-this');
         detonateThisButton.addEventListener('click', detonateThis);
