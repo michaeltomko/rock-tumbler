@@ -346,7 +346,6 @@
           });
 
           _this.player.observe(models.EVENT.CHANGE, function(event) {
-            log(event);
             _this.worker.postMessage(_(event.data).pairs().object().value());
           });
 
@@ -376,13 +375,10 @@
         }
 
         this.respond = function(e) {
+          log(e.data);
           switch (e.data) {
             case "initial":
-              if (_this.playlist.indexOf(_this.player.track) != 0) {
-              _this.moveCurrentTrackToHead();
-            } else {
               _this.player.playing = false;
-            }
             break;
             case "next":
               _this.n.next(_this);
@@ -533,6 +529,7 @@
       var rt = new RockTumblerSession();
 
       function setupDroppedPlaylist(drop) {
+        if (rt.orig_playlist) rt = new RockTumblerSession();
         rt.init(drop.uri);
         rt.setupPlaylists();
       }
