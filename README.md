@@ -29,6 +29,7 @@ Rock Tumbler takes the pain out of listening to playlists in Spotify. Some might
 Feel free to contact me at: [tomko@theablefew.com](mailto://tomko@theablefew.com)
 
 ## Release History
+* __2013/05/05__ - _0.3.0_ - Bug fixes. First version UI. Player context is now set on playlist drop.
 * __2013/05/04__ - _0.2.0_ - Bug fixes. Playlists are de-duplicated before shuffling. Refactored sessions.
 * __2013/05/04__ - _0.1.1_ - Bug fixes. Switched to Lo-Dash.js. Added logger.
 * __2013/05/02__ - _0.1.0_ - Initial functional release
