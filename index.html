@@ -285,7 +285,7 @@
         }
 
         this.init = function(drop) {
-          orig_playlist = models.Playlist.fromURI(drop);
+          var orig_playlist = models.Playlist.fromURI(drop);
           _this.orig_playlist = orig_playlist;
           _this.playlist = new models.Playlist();
           _this.played_list = new models.Playlist();
@@ -346,6 +346,7 @@
           });
 
           _this.player.observe(models.EVENT.CHANGE, function(event) {
+            log(event);
             _this.worker.postMessage(_(event.data).pairs().object().value());
           });
 
@@ -380,7 +381,7 @@
               if (_this.playlist.indexOf(_this.player.track) != 0) {
               _this.moveCurrentTrackToHead();
             } else {
-              _this.player.playing = !(_this.player.playing);
+              _this.player.playing = false;
             }
             break;
             case "next":
@@ -532,8 +533,6 @@
       var rt = new RockTumblerSession();
 
       function setupDroppedPlaylist(drop) {
-        if (!typeof(rt)==='undefined') return false;
-
         rt.init(drop.uri);
         rt.setupPlaylists();
       }
