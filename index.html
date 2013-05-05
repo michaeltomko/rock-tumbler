@@ -67,10 +67,10 @@
             msg = "initial";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate) {
             msg = "play/pause";
-          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
-            msg = "next";
           } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
             msg = "ended";
+          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate) {
+            msg = "next";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate) {
             msg = "previous";
           } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate) {
@@ -89,9 +89,8 @@
         }
 
         function NextHandler(timeout) {
-          var _this = this,count,to_remove;
+          var _this = this,count,to_remove,eventTimeoutId;
 
-          var eventTimeoutId,count,i;
           this.indexCounter = 0;
           this.timeoutThreshold = timeout;
 
@@ -106,6 +105,12 @@
             _this.indexCounter = 0;
             to_remove = rt.track_array.splice(0,count);
             _.each(to_remove, function(track){rt.expireTrack(track);});
+          }
+
+          this.end = function(rt) {
+            rt.playlist.remove(_.first(rt.track_array));
+            localStorage.removeItem(rt.orig_playlist.data.uri);
+            delete rt;
           }
         }
 
@@ -139,12 +144,14 @@
 
             _(_this.r.result).each(function(value){
               track_uri = _this.orig_playlist.get(value).data.uri;
-              if (_.contains(_this.local_storage,track_uri.replace("spotify:track:",""))) {
+              if (_.contains(_this.local_storage,track_uri.replace("spotify:track:","")) && !_.contains(_this.played_tracks_array,track_uri)) {
                 _this.played_list.add(models.Track.fromURI(track_uri));
                 _this.played_tracks_array.push(track_uri);
               } else {
+                if (!_.contains(_this.track_array,track_uri)) {
                 _this.playlist.add(models.Track.fromURI(track_uri));
                 _this.track_array.push(track_uri);
+                }
               }
             });
 
@@ -327,7 +334,8 @@
               nh.next(rt);
             break;
             case "ended":
-              nh.next(rt);
+              log("ended");
+              nh.end(rt);
             break;
             case "jumped":
               if (rt.playlist.indexOf(rt.player.track) != 0) {
