@@ -82,11 +82,9 @@
         }
       </script>
       <script>
+        // Session Object
         function RockTumblerSession() {
           var _this = this,i,t;
-
-          var sp = getSpotifyApi();
-          var models = sp.require('$api/models');
 
           this.ui = new RockTumblerUI();
           this.ui.setupDropbox();
@@ -231,12 +229,9 @@
           }
         }
 
+        // UI Handler
         function RockTumblerUI() {
           var _this = this;
-
-          var sp = getSpotifyApi();
-          var models = sp.require('$api/models');
-          var views = sp.require("$api/views");
 
           this.playlist_HTML = document.getElementById('original-tracks-list');
           this.played_list_HTML = document.getElementById('played-tracks-list');
@@ -256,11 +251,6 @@
             _this.playlist_HTML.appendChild(_this.playlist.node);
             _this.played_list_HTML.appendChild(_this.played_list.node);
             _this.player_HTML.appendChild(_this.player.node);
-          }
-
-          function setContext() {
-            _this.player.context = _this.playlist.context = _this.session.playlist;
-            _this.played_list.context = _this.session.played_list;
           }
 
           this.setupDropbox = function() {
@@ -299,8 +289,14 @@
               setupDroppedPlaylist(drop);
             }, false);
           }
+
+          function setContext() {
+            _this.player.context = _this.playlist.context = _this.session.playlist;
+            _this.played_list.context = _this.session.played_list;
+          }
         }
 
+        // Handler for Next Events
         function NextHandler(timeout) {
           var _this = this,count,to_remove,eventTimeoutId;
 
@@ -328,6 +324,9 @@
         }
 
         // Setup The Session
+        var sp = getSpotifyApi();
+        var models = sp.require('$api/models');
+        var views = sp.require("$api/views");
         var rt = new RockTumblerSession();
 
         function setupDroppedPlaylist(drop) {
