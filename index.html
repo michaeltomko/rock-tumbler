@@ -453,6 +453,8 @@
         this.setupDropbox = function() {
           var drop_box = document.querySelector('#drop_box');
           var count = 0;
+          var instructions = document.getElementById("instructions");
+          var success_message;
 
           drop_box.addEventListener('dragstart', function(e){
             e.dataTransfer.setData('text/html', this.innerHTML);
@@ -478,20 +480,12 @@
 
           drop_box.addEventListener('drop', function(e){
             e.preventDefault();
-            
             player.shuffle = false;
-            var instructions = document.getElementById("instructions");
-            if (instructions) this.removeChild(instructions);
             var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
             this.classList.remove('over');
-            if (count == 0) {
-              var list_title = document.createElement('h4');
-              list_title.className = 'list-title';
-              list_title.innerHTML = 'Dropped Playlists:';
-              this.appendChild(list_title);
-            }
+            instructions.innerHTML = 'Dropped Playlists:';
             count++;
-            var success_message = document.createElement('p');
+            success_message = document.createElement('p');
             success_message.className = 'playlist-entry';
             success_message.innerHTML = count + '. ' + drop.name;
             this.appendChild(success_message);
@@ -538,7 +532,6 @@
       var rt = new RockTumblerSession();
 
       function setupDroppedPlaylist(drop) {
-        if (rt.orig_playlist) rt = new RockTumblerSession();
         rt.init(drop.uri);
         rt.setupPlaylists();
       }
