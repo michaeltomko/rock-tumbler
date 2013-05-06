@@ -297,6 +297,7 @@
         }
 
         this.setupPlaylists = function() {
+          _this.expireObservers();
           var track_uri;
           if (_this.local_storage.length==_this.orig_playlist.length) {
             localStorage.removeItem(_this.orig_playlist.data.uri);
@@ -346,7 +347,6 @@
           });
 
           _this.player.observe(models.EVENT.CHANGE, function(event) {
-            log(event);
             _this.worker.postMessage(_(event.data).pairs().object().value());
           });
 
@@ -354,6 +354,14 @@
           _this.ui.placeHTML();
           _this.start_track = _this.playlist.get(0);
           _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
+        }
+
+        this.expireObservers = function() {
+          _this.orig_playlist.ignore(models.EVENT.ITEMS_REMOVED);
+          _this.orig_playlist.ignore(models.EVENT.ITEMS_ADDED);
+          _this.playlist.ignore(models.EVENT.CHANGE);
+          _this.played_list.ignore(models.EVENT.CHANGE);
+          _this.player.ignore(models.EVENT.CHANGE);
         }
 
         this.expireTrack = function(track) {
@@ -376,13 +384,10 @@
         }
 
         this.respond = function(e) {
+          log(e.data);
           switch (e.data) {
             case "initial":
-              if (_this.playlist.indexOf(_this.player.track) != 0) {
-              _this.moveCurrentTrackToHead();
-            } else {
               _this.player.playing = false;
-            }
             break;
             case "next":
               _this.n.next(_this);
@@ -448,6 +453,8 @@
         this.setupDropbox = function() {
           var drop_box = document.querySelector('#drop_box');
           var count = 0;
+          var instructions = document.getElementById("instructions");
+          var success_message;
 
           drop_box.addEventListener('dragstart', function(e){
             e.dataTransfer.setData('text/html', this.innerHTML);
@@ -473,20 +480,12 @@
 
           drop_box.addEventListener('drop', function(e){
             e.preventDefault();
-            
             player.shuffle = false;
-            var instructions = document.getElementById("instructions");
-            if (instructions) this.removeChild(instructions);
             var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
             this.classList.remove('over');
-            if (count == 0) {
-              var list_title = document.createElement('h4');
-              list_title.className = 'list-title';
-              list_title.innerHTML = 'Playlists:';
-              this.appendChild(list_title);
-            }
+            instructions.innerHTML = 'Dropped Playlists:';
             count++;
-            var success_message = document.createElement('p');
+            success_message = document.createElement('p');
             success_message.className = 'playlist-entry';
             success_message.innerHTML = count + '. ' + drop.name;
             this.appendChild(success_message);
@@ -541,7 +540,7 @@
       var detonateThisButton = document.getElementById('detonate-this');
       detonateThisButton.addEventListener('click', detonateThis);
 
-      var detonateAllButton = document.getElementById('detonate-this');
+      var detonateAllButton = document.getElementById('detonate-all');
       detonateAllButton.addEventListener('click', detonateAll);
 
       function detonateThis() {
