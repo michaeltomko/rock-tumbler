@@ -297,6 +297,7 @@
         }
 
         this.setupPlaylists = function() {
+          _this.expireObservers();
           var track_uri;
           if (_this.local_storage.length==_this.orig_playlist.length) {
             localStorage.removeItem(_this.orig_playlist.data.uri);
@@ -353,6 +354,14 @@
           _this.ui.placeHTML();
           _this.start_track = _this.playlist.get(0);
           _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
+        }
+
+        this.expireObservers = function() {
+          _this.orig_playlist.ignore(models.EVENT.ITEMS_REMOVED);
+          _this.orig_playlist.ignore(models.EVENT.ITEMS_ADDED);
+          _this.playlist.ignore(models.EVENT.CHANGE);
+          _this.played_list.ignore(models.EVENT.CHANGE);
+          _this.player.ignore(models.EVENT.CHANGE);
         }
 
         this.expireTrack = function(track) {
