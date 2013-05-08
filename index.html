@@ -89,7 +89,16 @@
        p {
         margin-bottom:15px;
        }
-
+      ol {
+        margin:0;
+        padding:0;
+        list-style-type:decimal;
+        list-style-position:inside;
+      }
+      ol li {
+        margin:5px 0;
+        padding:0;
+      }
        /* Player */
        #player {min-height:140px; float:right;}
        #player .sp-player {float:left;width:250px;height:250px;}
@@ -233,7 +242,7 @@
       <div id="header">
         <h1>Rock Tumbler</h1>
       </div>
-      <div id="drop_box" class=""><h4 id="instructions">Drop any playlist here to get started.</h4></div>
+      <div id="drop_box" class=""><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
       <div id="player"></div>
       <div class="clearfix"></div>
       <div id="original-tracks-list"></div>
@@ -300,6 +309,7 @@
         }
 
         this.setupPlaylists = function() {
+          _this.player.shuffle = false;
           _this.expireObservers();
           var track_uri;
           if (_this.local_storage.length==_this.orig_playlist.length) {
@@ -466,8 +476,8 @@
 
         this.setupDropbox = function() {
           var drop_box = document.querySelector('#drop_box');
-          var count = 0;
           var instructions = document.getElementById("instructions");
+          var drop_list = document.getElementById("drop-list");
           var success_message;
 
           drop_box.addEventListener('dragstart', function(e){
@@ -493,16 +503,14 @@
           }, false);
 
           drop_box.addEventListener('drop', function(e){
-            e.preventDefault();
-            player.shuffle = false;
+            e.preventDefault(); 
             var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
             this.classList.remove('over');
             instructions.innerHTML = 'Dropped Playlists:';
-            count++;
-            success_message = document.createElement('p');
+            success_message = document.createElement('li');
             success_message.className = 'playlist-entry';
-            success_message.innerHTML = count + '. ' + drop.name;
-            this.appendChild(success_message);
+            success_message.innerHTML = drop.name;
+            drop_list.appendChild(success_message);
             setupDroppedPlaylist(drop);
           }, false);
         }
