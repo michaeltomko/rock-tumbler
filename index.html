@@ -293,7 +293,7 @@
           _this.played_tracks_array = [];
           _this.local_storage = getLocalStorage();
           _this.r = new RandomizerArray(_this.orig_playlist.length);
-          _this.n = new NextHandler(750);
+          _this.n = new NextHandler(675);
         }
 
         this.setupPlaylists = function() {
@@ -374,7 +374,6 @@
 
         this.checkExpiration = function() {
           var index = _this.playlist.indexOf(rt.player.track);
-          log(index);
           if (index > 0) {
           to_remove = _this.track_array.splice(0,index - 1);
           _.each(to_remove, function(track){_this.expireTrack(track);});
