@@ -400,7 +400,7 @@
               _this.n.next(_this);
             break;
             case "ended":
-              _this.n.end(_this);
+              _this.n.next(_this);
             break;
             case "jumped":
               if (_this.playlist.indexOf(_this.player.track) != 0) {
@@ -525,11 +525,7 @@
           to_remove = rt.track_array.splice(0,count);
           _.each(to_remove, function(track){rt.expireTrack(track);});
           rt.checkExpiration();
-        }
-
-        this.end = function(rt) {
-          rt.playlist.remove(_.first(rt.track_array));
-          localStorage.removeItem(rt.orig_playlist.data.uri);
+          if (rt.playlist.length == 0) localStorage.removeItem(rt.orig_playlist.data.uri);
         }
       }
 
@@ -617,8 +613,8 @@
           try { 
             localStorage.setItem("DATA", data + data);
           } catch(e) {
-            console.log("LIMIT REACHED: (" + i + ")");
-            console.log(e);
+            log("LIMIT REACHED: (" + i + ")");
+            log(e);
           }
         }
       }
