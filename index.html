@@ -268,7 +268,7 @@
       <script>
         // Session Object
       function RockTumblerSession() {
-        var _this = this,i,t;
+        var _this = this,i,t,to_remove;
 
         this.ui = new RockTumblerUI();
         this.ui.setupDropbox();
@@ -370,6 +370,15 @@
           _this.playlist.remove(track);
           _this.played_list.add(track);
           _this.played_tracks_array.push(track);
+        }
+
+        this.checkExpiration = function() {
+          var index = _this.playlist.indexOf(rt.player.track);
+          log(index);
+          if (index > 0) {
+          to_remove = _this.track_array.splice(0,index - 1);
+          _.each(to_remove, function(track){_this.expireTrack(track);});
+          }
         }
 
         this.moveCurrentTrackToHead = function() {
@@ -516,6 +525,7 @@
           _this.indexCounter = 0;
           to_remove = rt.track_array.splice(0,count);
           _.each(to_remove, function(track){rt.expireTrack(track);});
+          rt.checkExpiration();
         }
 
         this.end = function(rt) {
