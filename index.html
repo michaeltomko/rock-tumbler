@@ -62,7 +62,7 @@
     #wrapper {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
     #header {text-align:center;}
     #buttons {text-align:center;margin-top:150px;}
-
+    
     /* Text */
     h1 {
       font-size:12.7em;
@@ -85,6 +85,9 @@
        }
        #instructions {
          -webkit-transition: all 0.3s ease-out;
+       }
+       p {
+        margin-bottom:15px;
        }
 
        /* Player */
@@ -457,6 +460,10 @@
           _this.player_HTML.appendChild(_this.player.node);
         }
 
+        this.completedMessage = function() {
+          _this.playlist_HTML.innerHTML = "<p>You've just completed your entire playlist. Just drop another one in the box above to keep listening.</p><p>Thanks for using Rock Tumbler!</p><p>Sincerely,<br>The Management</p>"
+        }
+
         this.setupDropbox = function() {
           var drop_box = document.querySelector('#drop_box');
           var count = 0;
@@ -524,8 +531,12 @@
           _this.indexCounter = 0;
           to_remove = rt.track_array.splice(0,count);
           _.each(to_remove, function(track){rt.expireTrack(track);});
-          rt.checkExpiration();
-          if (rt.playlist.length == 0) localStorage.removeItem(rt.orig_playlist.data.uri);
+          if (rt.playlist.length == 0) {
+            localStorage.removeItem(rt.orig_playlist.data.uri);
+            rt.ui.completedMessage();
+          } else {
+            rt.checkExpiration();
+          }
         }
       }
 
