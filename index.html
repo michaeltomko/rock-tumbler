@@ -305,7 +305,7 @@
           _this.played_tracks_array = [];
           _this.local_storage = getLocalStorage();
           _this.r = new RandomizerArray(_this.orig_playlist.length);
-          _this.n = new NextHandler(675);
+          _this.n = new NextHandler(600);
         }
 
         this.setupPlaylists = function() {
@@ -405,9 +405,13 @@
         }
 
         this.respond = function(e) {
+          log(e);
           switch (e.data) {
             case "initial":
               _this.player.playing = false;
+            break;
+            case "play/pause":
+              _this.checkExpiration();
             break;
             case "next":
               _this.n.next(_this);
