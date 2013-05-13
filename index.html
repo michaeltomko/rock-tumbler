@@ -391,6 +391,7 @@
           to_remove = _this.track_array.splice(0,index);
           _.each(to_remove, function(track){_this.expireTrack(track);});
           }
+          _this.ui.setTrackLength();
         }
 
         this.moveCurrentTrackToHead = function() {
@@ -456,7 +457,7 @@
 
       // UI Handler
       function RockTumblerUI() {
-        var _this = this;
+        var _this = this,minutes,seconds;
 
         this.playlist_HTML = document.getElementById('original-tracks-list');
         this.played_list_HTML = document.getElementById('played-tracks-list');
@@ -473,9 +474,18 @@
 
         this.placeHTML = function() {
           _this.playlist_HTML.innerHTML = _this.played_list_HTML.innerHTML = _this.player_HTML.innerHTML = '';
+          _this.playlist_HTML.innerHTML = "<p id='playlist_meta'><strong>Playlist:</strong> " + _this.session.playlist.length + " Tracks | " + calculateDuration(_this.session.playlist.data.getDuration()) + "</p>";
+          _this.played_list_HTML.innerHTML = "<p id='played_list_meta'><strong>Played List:</strong>" + _this.session.played_list.length + " Tracks | " + calculateDuration(_this.session.played_list.data.getDuration()) + "</p>";
+          _this.playlist_meta = document.getElementById('playlist_meta');
+          _this.played_list_meta = document.getElementById('played_list_meta');
           _this.playlist_HTML.appendChild(_this.playlist.node);
           _this.played_list_HTML.appendChild(_this.played_list.node);
           _this.player_HTML.appendChild(_this.player.node);
+        }
+
+        this.setTrackLength = function() {
+          _this.playlist_meta.innerHTML = "<strong>Playlist:</strong> " + _this.session.playlist.length + " Tracks | " + calculateDuration(_this.session.playlist.data.getDuration());
+          _this.played_list_meta.innerHTML = "<strong>Played List:</strong> " + _this.session.played_list.length + " Tracks | " + calculateDuration(_this.session.played_list.data.getDuration());
         }
 
         this.completedMessage = function() {
@@ -521,6 +531,12 @@
             drop_list.appendChild(success_message);
             setupDroppedPlaylist(drop);
           }, false);
+        }
+
+        function calculateDuration(time) {
+          minutes = Math.floor(time / 60);
+          seconds = time - minutes * 60;
+          return minutes + ":" + seconds;
         }
 
         function setContext() {
