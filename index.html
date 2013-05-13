@@ -321,7 +321,7 @@
             track_uri = _this.orig_playlist.get(value).data.uri;
             if (_.contains(_this.local_storage,track_uri.replace("spotify:track:","")) && !_.contains(_this.played_tracks_array,track_uri)) {
               _this.played_list.add(models.Track.fromURI(track_uri));
-            mo  _this.played_tracks_array.push(track_uri);
+              _this.played_tracks_array.push(track_uri);
             } else {
               if (!_.contains(_this.track_array,track_uri)) {
                 _this.playlist.add(models.Track.fromURI(track_uri));
