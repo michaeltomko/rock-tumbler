@@ -353,11 +353,13 @@
             });
           });
 
-          //_this.playlist.observe(models.EVENT.CHANGE, function(event) {
-          //});
+          _this.playlist.observe(models.EVENT.CHANGE, function(event) {
+            _this.ui.updatePlaylistMeta();
+          });
 
-          //_this.played_list.observe(models.EVENT.CHANGE, function(event) {
-          //});
+          _this.played_list.observe(models.EVENT.CHANGE, function(event) {
+            _this.ui.updatePlaylistMeta();
+          });
 
           _this.player.observe(models.EVENT.CHANGE, function(event) {
             _this.worker.postMessage(_(event.data).pairs().object().value());
@@ -391,7 +393,6 @@
           to_remove = _this.track_array.splice(0,index);
           _.each(to_remove, function(track){_this.expireTrack(track);});
           }
-          _this.ui.setTrackLength();
         }
 
         this.moveCurrentTrackToHead = function() {
@@ -408,7 +409,6 @@
         this.respond = function(e) {
           switch (e.data) {
             case "initial":
-              _this.player.playing = false;
             break;
             case "play/pause":
               _this.checkExpiration();
@@ -457,7 +457,7 @@
 
       // UI Handler
       function RockTumblerUI() {
-        var _this = this,minutes,seconds;
+        var _this = this,hours,minutes,seconds;
 
         this.playlist_HTML = document.getElementById('original-tracks-list');
         this.played_list_HTML = document.getElementById('played-tracks-list');
@@ -483,7 +483,7 @@
           _this.player_HTML.appendChild(_this.player.node);
         }
 
-        this.setTrackLength = function() {
+        this.updatePlaylistMeta = function() {
           _this.playlist_meta.innerHTML = "<strong>Playlist:</strong> " + _this.session.playlist.length + " Tracks | " + calculateDuration(_this.session.playlist.data.getDuration());
           _this.played_list_meta.innerHTML = "<strong>Played List:</strong> " + _this.session.played_list.length + " Tracks | " + calculateDuration(_this.session.played_list.data.getDuration());
         }
@@ -534,9 +534,24 @@
         }
 
         function calculateDuration(time) {
+          hours = Math.floor(time / 3600);
+          time = time - hours * 3600;
           minutes = Math.floor(time / 60);
           seconds = time - minutes * 60;
-          return minutes + ":" + seconds;
+
+          if (seconds < 10) {
+            seconds = "0" + seconds.toString();
+          }
+
+          if (minutes < 10) {
+            minutes = "0" + minutes.toString();
+          }
+
+          if (hours < 10) {
+            hours = "0" + hours.toString();
+          }
+
+          return hours + ":" + minutes + ":" + seconds;
         }
 
         function setContext() {
