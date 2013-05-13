@@ -395,6 +395,12 @@
           }
         }
 
+        this.ended = function() {
+          to_remove = _this.track_array.splice(0,1);
+          _.each(to_remove, function(track){_this.expireTrack(track);});
+          _this.ui.completedMessage();
+        }
+
         this.moveCurrentTrackToHead = function() {
           i = _this.playlist.indexOf(_this.player.track.data.uri);
           t = _this.track_array.splice(i,1);
@@ -411,13 +417,12 @@
             case "initial":
             break;
             case "play/pause":
-              _this.checkExpiration();
             break;
             case ("next" || "previous"):
               _this.n.setTimer(_this);
             break;
             case "ended":
-              _this.n.next(_this);
+              _this.ended();
             break;
             case "jumped":
               if (_this.playlist.indexOf(_this.player.track) != 0) {
@@ -451,7 +456,7 @@
 
         function setContextButDoNotPlay() {
           _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
-          _this.player.playing = false;
+          //_this.player.playing = false;
         }
       }
 
