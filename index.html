@@ -265,10 +265,10 @@
             msg = "play/pause";
           } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
             msg = "ended";
-          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
-            msg = "next";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume) {
             msg = "previous";
+          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
+            msg = "next";
           } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
             msg = "jumped";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && event.data.shuffle && !event.data.volume) {
@@ -388,7 +388,7 @@
         this.checkExpiration = function() {
           var index = _this.playlist.indexOf(rt.player.track);
           if (index > 0) {
-          to_remove = _this.track_array.splice(0,index - 1);
+          to_remove = _this.track_array.splice(0,index);
           _.each(to_remove, function(track){_this.expireTrack(track);});
           }
         }
@@ -412,8 +412,8 @@
             case "play/pause":
               _this.checkExpiration();
             break;
-            case "next":
-              _this.n.next(_this);
+            case ("next" || "previous"):
+              _this.n.setTimer(_this);
             break;
             case "ended":
               _this.n.next(_this);
@@ -536,23 +536,13 @@
         this.indexCounter = 0;
         this.timeoutThreshold = timeout;
 
-        this.next = function(rt) {
-          _this.indexCounter++;
+        this.setTimer = function(rt) {
           clearTimeout(eventTimeoutId);
           eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
         }
 
         function onTimeout(rt) {
-          count = _this.indexCounter;
-          _this.indexCounter = 0;
-          to_remove = rt.track_array.splice(0,count);
-          _.each(to_remove, function(track){rt.expireTrack(track);});
-          if (rt.playlist.length == 0) {
-            localStorage.removeItem(rt.orig_playlist.data.uri);
-            rt.ui.completedMessage();
-          } else {
-            rt.checkExpiration();
-          }
+          rt.checkExpiration();
         }
       }
 
