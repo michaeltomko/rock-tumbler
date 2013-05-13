@@ -29,6 +29,7 @@ Rock Tumbler takes the pain out of listening to playlists in Spotify. Some might
 Feel free to contact me at: [tomko@theablefew.com](mailto://tomko@theablefew.com)
 
 ## Release History
+* __2013/05/12__ - _0.4.0_ - Lots of bug fixes. Previous button should now work while hitting multiple next events. Playlist and Played List now show track count and playlist duration.
 * __2013/05/07__ - _0.3.3_ - Switched to LZW compression for data stored in localStorage. Fixed issue with large amount of next events, or other situations, causing playlist to lose context. Fixed issue with end event usurping control from queued next events. Added messaging for when playlists have been completed.
 * __2013/05/05__ - _0.3.2_ - Repeatedly dropping playlists now works as expected. Cleaned up race conditions and oddness that occurred with the first track on some playlists.
 * __2013/05/05__ - _0.3.1_ - Bug fixes. Minor UI tweaks.
