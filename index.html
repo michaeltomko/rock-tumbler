@@ -262,7 +262,7 @@
           if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
             msg = "initial";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
-            msg = "play/pause";
+            msg = "play";
           } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
             msg = "ended";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume) {
