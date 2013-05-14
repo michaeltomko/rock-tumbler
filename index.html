@@ -280,7 +280,7 @@
       <script>
         // Session Object
       function RockTumblerSession() {
-        var _this = this,i,t,to_remove;
+        var _this = this,i,t,to_remove,track_uri;
 
         this.ui = new RockTumblerUI();
         this.ui.setupDropbox();
@@ -297,8 +297,7 @@
         }
 
         this.init = function(drop) {
-          var orig_playlist = models.Playlist.fromURI(drop);
-          _this.orig_playlist = orig_playlist;
+          _this.orig_playlist = models.Playlist.fromURI(drop);
           _this.playlist = new models.Playlist();
           _this.played_list = new models.Playlist();
           _this.track_array = [];
@@ -309,16 +308,13 @@
         }
 
         this.setupPlaylists = function() {
-          _this.player.shuffle = false;
+          disableShuffle();
           _this.expireObservers();
-          var track_uri;
-          if (_this.local_storage.length==_this.orig_playlist.length) {
-            localStorage.removeItem(_this.orig_playlist.data.uri);
-            _this.local_storage = getLocalStorage();
-          }
 
-          _(_this.r.result).each(function(value){
-            track_uri = _this.orig_playlist.get(value).data.uri;
+          _this.local_storage = getLocalStorage();
+
+          _(_this.r.result).each(function(index){
+            track_uri = _this.orig_playlist.get(index).data.uri;
             if (_.contains(_this.local_storage,track_uri.replace("spotify:track:","")) && !_.contains(_this.played_tracks_array,track_uri)) {
               _this.played_list.add(models.Track.fromURI(track_uri));
               _this.played_tracks_array.push(track_uri);
@@ -332,38 +328,7 @@
 
           _this.start_length = _this.track_array.length;
 
-          _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-            var in_playlist,i;
-            _.each(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list),function(track){   
-              _this.playlist.remove(track);
-              i = _.indexOf(_this.track_array,track,true);
-              _this.track_array.splice(i,1);             
-            });
-            _.each(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist),function(track){
-              _this.played_list.remove(track);
-              i = _.indexOf(_this.played_tracks_array,track,true);
-              _this.played_tracks_array.splice(i,1);
-            });
-          });
-
-          _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            _.each(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list),function(track){
-              _this.playlist.add(track);
-              _this.track_array.push(track);
-            });
-          });
-
-          _this.playlist.observe(models.EVENT.CHANGE, function(event) {
-            _this.ui.updatePlaylistMeta();
-          });
-
-          _this.played_list.observe(models.EVENT.CHANGE, function(event) {
-            _this.ui.updatePlaylistMeta();
-          });
-
-          _this.player.observe(models.EVENT.CHANGE, function(event) {
-            _this.worker.postMessage(_(event.data).pairs().object().value());
-          });
+          initializeObservers();
 
           _this.ui.init(_this);
           _this.ui.placeHTML();
@@ -396,7 +361,8 @@
         }
 
         this.ended = function() {
-          to_remove = _this.track_array.splice(0,1);
+          _this.n.clearTimer();
+          to_remove = _this.track_array.splice(0,_this.playlist.length);
           _.each(to_remove, function(track){_this.expireTrack(track);});
           _this.ui.completedMessage();
         }
@@ -413,13 +379,13 @@
         }
 
         this.respond = {
-          //initial:    function() {},
-          //play:     function() {},
+          initial:    function() {},
+          play:     function() {},
           next:    function() { _this.n.setTimer(_this); },
           previous:     function() { _this.n.setTimer(_this); },
           ended: function() { _this.ended(); },
           jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
-          shuffle: function() { _this.player.shuffle = false; }
+          shuffle: function() { disableShuffle(); }
         }  
 
         function getLocalStorage() {
@@ -427,12 +393,59 @@
             localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
             localStorage.removeItem(_this.orig_playlist.name);
           }
+
+          try {
+            if (_this.local_storage.length==_this.orig_playlist.length) {
+              localStorage.removeItem(_this.orig_playlist.data.uri);
+            }
+          } catch(err) {
+          }
+
           return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? lzw_decode(localStorage[_this.orig_playlist.data.uri]).split(",") : [];
+        }
+
+        function disableShuffle() {
+          _this.player.shuffle = false;
         }
 
         function RandomizerArray(length) {
           this.length = length;
           this.result = _.shuffle(_.range(this.length));
+        }
+
+        function initializeObservers() {
+          _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
+            var in_playlist,i;
+            _.each(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list),function(track){   
+              _this.playlist.remove(track);
+              i = _.indexOf(_this.track_array,track,true);
+              _this.track_array.splice(i,1);             
+            });
+            _.each(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist),function(track){
+              _this.played_list.remove(track);
+              i = _.indexOf(_this.played_tracks_array,track,true);
+              _this.played_tracks_array.splice(i,1);
+            });
+          });
+
+          _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
+            _.each(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list),function(track){
+              _this.playlist.add(track);
+              _this.track_array.push(track);
+            });
+          });
+
+          _this.playlist.observe(models.EVENT.CHANGE, function(event) {
+            _this.ui.updatePlaylistMeta();
+          });
+
+          _this.played_list.observe(models.EVENT.CHANGE, function(event) {
+            _this.ui.updatePlaylistMeta();
+          });
+
+          _this.player.observe(models.EVENT.CHANGE, function(event) {
+            _this.worker.postMessage(_(event.data).pairs().object().value());
+          });
         }
 
         function diffBetweenPlaylists(main,comp1,comp2) {
@@ -444,7 +457,6 @@
 
         function setContextButDoNotPlay() {
           _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
-          //_this.player.playing = false;
         }
       }
 
@@ -563,6 +575,10 @@
         this.setTimer = function(rt) {
           clearTimeout(eventTimeoutId);
           eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
+        }
+
+        this.clearTimer = function() {
+          clearTimeout(eventTimeoutId);
         }
 
         function onTimeout(rt) {
