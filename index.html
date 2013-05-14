@@ -62,7 +62,7 @@
     #wrapper {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
     #header {text-align:center;}
     #buttons {text-align:center;margin-top:150px;}
-    
+
     /* Text */
     h1 {
       font-size:12.7em;
@@ -87,18 +87,18 @@
          -webkit-transition: all 0.3s ease-out;
        }
        p {
-        margin-bottom:15px;
+         margin-bottom:15px;
        }
-      ol {
-        margin:0;
-        padding:0;
-        list-style-type:decimal;
-        list-style-position:inside;
-      }
-      ol li {
-        margin:5px 0;
-        padding:0;
-      }
+       ol {
+         margin:0;
+         padding:0;
+         list-style-type:decimal;
+         list-style-position:inside;
+       }
+       ol li {
+         margin:5px 0;
+         padding:0;
+       }
        /* Player */
        #player {min-height:140px; float:right;}
        #player .sp-player {float:left;width:250px;height:250px;}
@@ -293,7 +293,7 @@
         this.worker = new Worker(window.URL.createObjectURL(blob));
 
         this.worker.onmessage = function(e) {
-          _this.respond(e);
+          _this.respond[e.data]();
         }
 
         this.init = function(drop) {
@@ -390,8 +390,8 @@
         this.checkExpiration = function() {
           var index = _this.playlist.indexOf(rt.player.track);
           if (index > 0) {
-          to_remove = _this.track_array.splice(0,index);
-          _.each(to_remove, function(track){_this.expireTrack(track);});
+            to_remove = _this.track_array.splice(0,index);
+            _.each(to_remove, function(track){_this.expireTrack(track);});
           }
         }
 
@@ -412,27 +412,15 @@
           }
         }
 
-        this.respond = function(e) {
-          switch (e.data) {
-            case "initial":
-            break;
-            case "play/pause":
-            break;
-            case ("next" || "previous"):
-              _this.n.setTimer(_this);
-            break;
-            case "ended":
-              _this.ended();
-            break;
-            case "jumped":
-              if (_this.playlist.indexOf(_this.player.track) != 0) {
-              _this.moveCurrentTrackToHead();
-            }
-            case "shuffle":
-              _this.player.shuffle = false;
-            break;
-          }          
-        }
+        this.respond = {
+          //initial:    function() {},
+          //play:     function() {},
+          next:    function() { _this.n.setTimer(_this); },
+          previous:     function() { _this.n.setTimer(_this); },
+          ended: function() { _this.ended(); },
+          jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
+          shuffle: function() { _this.player.shuffle = false; }
+        }  
 
         function getLocalStorage() {
           if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
