@@ -365,7 +365,8 @@
         }
 
         this.ended = function() {
-          to_remove = _this.track_array.splice(0,1);
+          _this.n.clearTimer();
+          to_remove = _this.track_array.splice(0,_this.playlist.length);
           _.each(to_remove, function(track){_this.expireTrack(track);});
           _this.ui.completedMessage();
         }
@@ -575,6 +576,10 @@
         this.setTimer = function(rt) {
           clearTimeout(eventTimeoutId);
           eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
+        }
+
+        this.clearTimer = function() {
+          clearTimeout(eventTimeoutId);
         }
 
         function onTimeout(rt) {
