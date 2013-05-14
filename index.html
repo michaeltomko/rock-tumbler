@@ -256,6 +256,7 @@
       </div>
       <script src="/js/lodash.min.js"></script>
       <script src="/js/log.js"></script>
+      <script src="/js/mousetrap.min.js"></script>
       <script id="worker" type="javascript/worker">
         var msg;
         self.onmessage = function(event) {
@@ -305,6 +306,7 @@
           _this.local_storage = getLocalStorage();
           _this.r = new RandomizerArray(_this.orig_playlist.length);
           _this.n = new NextHandler(600);
+          bindKeys();
         }
 
         this.setupPlaylists = function() {
@@ -411,6 +413,13 @@
         function RandomizerArray(length) {
           this.length = length;
           this.result = _.shuffle(_.range(this.length));
+        }
+        
+        function bindKeys() {
+          Mousetrap.bind('command+shift+s', function(e) {
+            _this.player.track.starred = !_this.player.track.starred;
+            return false;
+          });
         }
 
         function initializeObservers() {
