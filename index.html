@@ -280,7 +280,7 @@
       <script>
         // Session Object
       function RockTumblerSession() {
-        var _this = this,i,t,to_remove;
+        var _this = this,i,t,to_remove,track_uri;
 
         this.ui = new RockTumblerUI();
         this.ui.setupDropbox();
@@ -293,13 +293,11 @@
         this.worker = new Worker(window.URL.createObjectURL(blob));
 
         this.worker.onmessage = function(e) {
-          log(e.data);
           _this.respond[e.data]();
         }
 
         this.init = function(drop) {
-          var orig_playlist = models.Playlist.fromURI(drop);
-          _this.orig_playlist = orig_playlist;
+          _this.orig_playlist = models.Playlist.fromURI(drop);
           _this.playlist = new models.Playlist();
           _this.played_list = new models.Playlist();
           _this.track_array = [];
@@ -310,15 +308,13 @@
         }
 
         this.setupPlaylists = function() {
-          _this.player.shuffle = false;
+          disableShuffle();
           _this.expireObservers();
-
-          var track_uri;
 
           _this.local_storage = getLocalStorage();
 
-          _(_this.r.result).each(function(value){
-            track_uri = _this.orig_playlist.get(value).data.uri;
+          _(_this.r.result).each(function(index){
+            track_uri = _this.orig_playlist.get(index).data.uri;
             if (_.contains(_this.local_storage,track_uri.replace("spotify:track:","")) && !_.contains(_this.played_tracks_array,track_uri)) {
               _this.played_list.add(models.Track.fromURI(track_uri));
               _this.played_tracks_array.push(track_uri);
@@ -389,7 +385,7 @@
           previous:     function() { _this.n.setTimer(_this); },
           ended: function() { _this.ended(); },
           jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
-          shuffle: function() { _this.player.shuffle = false; }
+          shuffle: function() { disableShuffle(); }
         }  
 
         function getLocalStorage() {
@@ -406,6 +402,10 @@
           }
 
           return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? lzw_decode(localStorage[_this.orig_playlist.data.uri]).split(",") : [];
+        }
+
+        function disableShuffle() {
+          _this.player.shuffle = false;
         }
 
         function RandomizerArray(length) {
