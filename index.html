@@ -62,7 +62,7 @@
     #wrapper {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
     #header {text-align:center;}
     #buttons {text-align:center;margin-top:150px;}
-    
+
     /* Text */
     h1 {
       font-size:12.7em;
@@ -87,18 +87,18 @@
          -webkit-transition: all 0.3s ease-out;
        }
        p {
-        margin-bottom:15px;
+         margin-bottom:15px;
        }
-      ol {
-        margin:0;
-        padding:0;
-        list-style-type:decimal;
-        list-style-position:inside;
-      }
-      ol li {
-        margin:5px 0;
-        padding:0;
-      }
+       ol {
+         margin:0;
+         padding:0;
+         list-style-type:decimal;
+         list-style-position:inside;
+       }
+       ol li {
+         margin:5px 0;
+         padding:0;
+       }
        /* Player */
        #player {min-height:140px; float:right;}
        #player .sp-player {float:left;width:250px;height:250px;}
@@ -262,7 +262,7 @@
           if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
             msg = "initial";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
-            msg = "play/pause";
+            msg = "play";
           } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
             msg = "ended";
           } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume) {
@@ -280,7 +280,7 @@
       <script>
         // Session Object
       function RockTumblerSession() {
-        var _this = this,i,t,to_remove;
+        var _this = this,i,t,to_remove,track_uri;
 
         this.ui = new RockTumblerUI();
         this.ui.setupDropbox();
@@ -293,12 +293,11 @@
         this.worker = new Worker(window.URL.createObjectURL(blob));
 
         this.worker.onmessage = function(e) {
-          _this.respond(e);
+          _this.respond[e.data]();
         }
 
         this.init = function(drop) {
-          var orig_playlist = models.Playlist.fromURI(drop);
-          _this.orig_playlist = orig_playlist;
+          _this.orig_playlist = models.Playlist.fromURI(drop);
           _this.playlist = new models.Playlist();
           _this.played_list = new models.Playlist();
           _this.track_array = [];
@@ -309,16 +308,13 @@
         }
 
         this.setupPlaylists = function() {
-          _this.player.shuffle = false;
+          disableShuffle();
           _this.expireObservers();
-          var track_uri;
-          if (_this.local_storage.length==_this.orig_playlist.length) {
-            localStorage.removeItem(_this.orig_playlist.data.uri);
-            _this.local_storage = getLocalStorage();
-          }
 
-          _(_this.r.result).each(function(value){
-            track_uri = _this.orig_playlist.get(value).data.uri;
+          _this.local_storage = getLocalStorage();
+
+          _(_this.r.result).each(function(index){
+            track_uri = _this.orig_playlist.get(index).data.uri;
             if (_.contains(_this.local_storage,track_uri.replace("spotify:track:","")) && !_.contains(_this.played_tracks_array,track_uri)) {
               _this.played_list.add(models.Track.fromURI(track_uri));
               _this.played_tracks_array.push(track_uri);
@@ -332,6 +328,92 @@
 
           _this.start_length = _this.track_array.length;
 
+          initializeObservers();
+
+          _this.ui.init(_this);
+          _this.ui.placeHTML();
+          _this.start_track = _this.playlist.get(0);
+          setTimeout(function() { setContextButDoNotPlay(); }, 500);
+        }
+
+        this.expireObservers = function() {
+          _this.orig_playlist.ignore(models.EVENT.ITEMS_REMOVED);
+          _this.orig_playlist.ignore(models.EVENT.ITEMS_ADDED);
+          _this.playlist.ignore(models.EVENT.CHANGE);
+          _this.played_list.ignore(models.EVENT.CHANGE);
+          _this.player.ignore(models.EVENT.CHANGE);
+        }
+
+        this.expireTrack = function(track) {
+          _this.local_storage.push(track.replace("spotify:track:",""));
+          localStorage[_this.orig_playlist.data.uri] = lzw_encode(_this.local_storage);
+          _this.playlist.remove(track);
+          _this.played_list.add(track);
+          _this.played_tracks_array.push(track);
+        }
+
+        this.checkExpiration = function() {
+          var index = _this.playlist.indexOf(rt.player.track);
+          if (index > 0) {
+            to_remove = _this.track_array.splice(0,index);
+            _.each(to_remove, function(track){_this.expireTrack(track);});
+          }
+        }
+
+        this.ended = function() {
+          _this.n.clearTimer();
+          to_remove = _this.track_array.splice(0,_this.playlist.length);
+          _.each(to_remove, function(track){_this.expireTrack(track);});
+          _this.ui.completedMessage();
+        }
+
+        this.moveCurrentTrackToHead = function() {
+          i = _this.playlist.indexOf(_this.player.track.data.uri);
+          t = _this.track_array.splice(i,1);
+          _this.track_array.unshift(_.first(t));
+          _this.playlist.data.move(_this.player.track.data.uri,0);
+          if (_this.track_array.length != _this.start_length) {
+            _this.expireTrack(_this.playlist.get(1).uri);
+            _this.track_array.splice(1,1);
+          }
+        }
+
+        this.respond = {
+          initial:    function() {},
+          play:     function() {},
+          next:    function() { _this.n.setTimer(_this); },
+          previous:     function() { _this.n.setTimer(_this); },
+          ended: function() { _this.ended(); },
+          jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
+          shuffle: function() { disableShuffle(); }
+        }  
+
+        function getLocalStorage() {
+          if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
+            localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
+            localStorage.removeItem(_this.orig_playlist.name);
+          }
+
+          try {
+            if (_this.local_storage.length==_this.orig_playlist.length) {
+              localStorage.removeItem(_this.orig_playlist.data.uri);
+            }
+          } catch(err) {
+          }
+
+          return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? lzw_decode(localStorage[_this.orig_playlist.data.uri]).split(",") : [];
+        }
+
+        function disableShuffle() {
+          _this.player.shuffle = false;
+        }
+
+        function RandomizerArray(length) {
+          this.length = length;
+          this.result = _.shuffle(_.range(this.length));
+        }
+
+        function initializeObservers() {
           _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
             var in_playlist,i;
             _.each(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list),function(track){   
@@ -364,87 +446,6 @@
           _this.player.observe(models.EVENT.CHANGE, function(event) {
             _this.worker.postMessage(_(event.data).pairs().object().value());
           });
-
-          _this.ui.init(_this);
-          _this.ui.placeHTML();
-          _this.start_track = _this.playlist.get(0);
-          setTimeout(function() { setContextButDoNotPlay(); }, 500);
-        }
-
-        this.expireObservers = function() {
-          _this.orig_playlist.ignore(models.EVENT.ITEMS_REMOVED);
-          _this.orig_playlist.ignore(models.EVENT.ITEMS_ADDED);
-          _this.playlist.ignore(models.EVENT.CHANGE);
-          _this.played_list.ignore(models.EVENT.CHANGE);
-          _this.player.ignore(models.EVENT.CHANGE);
-        }
-
-        this.expireTrack = function(track) {
-          _this.local_storage.push(track.replace("spotify:track:",""));
-          localStorage[_this.orig_playlist.data.uri] = lzw_encode(_this.local_storage);
-          _this.playlist.remove(track);
-          _this.played_list.add(track);
-          _this.played_tracks_array.push(track);
-        }
-
-        this.checkExpiration = function() {
-          var index = _this.playlist.indexOf(rt.player.track);
-          if (index > 0) {
-          to_remove = _this.track_array.splice(0,index);
-          _.each(to_remove, function(track){_this.expireTrack(track);});
-          }
-        }
-
-        this.ended = function() {
-          to_remove = _this.track_array.splice(0,1);
-          _.each(to_remove, function(track){_this.expireTrack(track);});
-          _this.ui.completedMessage();
-        }
-
-        this.moveCurrentTrackToHead = function() {
-          i = _this.playlist.indexOf(_this.player.track.data.uri);
-          t = _this.track_array.splice(i,1);
-          _this.track_array.unshift(_.first(t));
-          _this.playlist.data.move(_this.player.track.data.uri,0);
-          if (_this.track_array.length != _this.start_length) {
-            _this.expireTrack(_this.playlist.get(1).uri);
-            _this.track_array.splice(1,1);
-          }
-        }
-
-        this.respond = function(e) {
-          switch (e.data) {
-            case "initial":
-            break;
-            case "play/pause":
-            break;
-            case ("next" || "previous"):
-              _this.n.setTimer(_this);
-            break;
-            case "ended":
-              _this.ended();
-            break;
-            case "jumped":
-              if (_this.playlist.indexOf(_this.player.track) != 0) {
-              _this.moveCurrentTrackToHead();
-            }
-            case "shuffle":
-              _this.player.shuffle = false;
-            break;
-          }          
-        }
-
-        function getLocalStorage() {
-          if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
-            localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
-            localStorage.removeItem(_this.orig_playlist.name);
-          }
-          return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? lzw_decode(localStorage[_this.orig_playlist.data.uri]).split(",") : [];
-        }
-
-        function RandomizerArray(length) {
-          this.length = length;
-          this.result = _.shuffle(_.range(this.length));
         }
 
         function diffBetweenPlaylists(main,comp1,comp2) {
@@ -456,7 +457,6 @@
 
         function setContextButDoNotPlay() {
           _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
-          //_this.player.playing = false;
         }
       }
 
@@ -575,6 +575,10 @@
         this.setTimer = function(rt) {
           clearTimeout(eventTimeoutId);
           eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
+        }
+
+        this.clearTimer = function() {
+          clearTimeout(eventTimeoutId);
         }
 
         function onTimeout(rt) {
