@@ -41,4 +41,4 @@ Feel free to contact me at: [tomko@theablefew.com](mailto://tomko@theablefew.com
 * __2013/05/02__ - _0.1.0_ - Initial functional release
 
 ----
-The Able Few - [St. Louis Ruby & NodeJS development](http://theablefew.com)
+The Able Few - [St. Louis Ruby on Rails & NodeJS development](http://theablefew.com/?utm_source=GitHub&utm_medium=link&utm_campaign=rock-tumbler)
