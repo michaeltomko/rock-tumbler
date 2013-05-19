@@ -360,21 +360,21 @@
           var index = _this.playlist.indexOf(rt.player.track);
           if (index > 0) {
             to_remove = _this.track_array.splice(0,index);
-            _.each(to_remove, function(track){_this.expireTrack(track);});
+            Lazy(to_remove).each(function(track){_this.expireTrack(track);});
           }
         }
 
         this.ended = function() {
           _this.n.clearTimer();
           to_remove = _this.track_array.splice(0,_this.playlist.length);
-          _.each(to_remove, function(track){_this.expireTrack(track);});
+          Lazy(to_remove).each(function(track){_this.expireTrack(track);});
           _this.ui.completedMessage();
         }
 
         this.moveCurrentTrackToHead = function() {
           i = _this.playlist.indexOf(_this.player.track.data.uri);
           t = _this.track_array.splice(i,1);
-          _this.track_array.unshift(_.first(t));
+          _this.track_array.unshift(Lazy(t).first());
           _this.playlist.data.move(_this.player.track.data.uri,0);
           if (_this.track_array.length != _this.start_length) {
             _this.expireTrack(_this.playlist.get(1).uri);
