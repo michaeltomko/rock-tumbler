@@ -254,6 +254,8 @@
         <input type="button" class="btn btn-mini" id="detonate-this" value="Detonate This Playlist">
         <input type="button" class="btn btn-mini" id="detonate-all" value="Detonate All Playlists">
       </div>
+      <script src="/js/lazy.min.js"></script>
+      <script src="/js/lazy.dom.min.js"></script>
       <script src="/js/lodash.min.js"></script>
       <script src="/js/log.js"></script>
       <script src="/js/mousetrap.min.js"></script>
@@ -315,13 +317,13 @@
 
           _this.local_storage = getLocalStorage();
 
-          _(_this.r.result).each(function(index){
+          Lazy(_this.r.result).each(function(index){
             track_uri = _this.orig_playlist.get(index).data.uri;
-            if (_.contains(_this.local_storage,track_uri.replace("spotify:track:","")) && !_.contains(_this.played_tracks_array,track_uri)) {
+            if (Lazy(_this.local_storage).contains(track_uri.replace("spotify:track:","")) && !Lazy(_this.played_tracks_array).contains(track_uri)) {
               _this.played_list.add(models.Track.fromURI(track_uri));
               _this.played_tracks_array.push(track_uri);
             } else {
-              if (!_.contains(_this.track_array,track_uri)) {
+              if (!Lazy(_this.track_array).contains(track_uri)) {
                 _this.playlist.add(models.Track.fromURI(track_uri));
                 _this.track_array.push(track_uri);
               }
@@ -412,7 +414,7 @@
 
         function RandomizerArray(length) {
           this.length = length;
-          this.result = _.shuffle(_.range(this.length));
+          this.result = Lazy.range(this.length).shuffle();
         }
         
         function bindKeys() {
