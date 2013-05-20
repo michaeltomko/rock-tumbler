@@ -484,12 +484,15 @@
 
           iterateThroughOrigPlaylist(stars);
 
-          if (_this.track_array.length == 0 && stars == "no_stars") {
-            $('#stars').attr('checked', true);
-            stars = "stars";
+          if (_this.track_array.length == 0) {
+            if (stars == "no_stars") {
+              $('#stars').attr('checked', true);
+              stars = "stars";
+            }
+            _this.local_storage = getLocalStorage();
             _this.track_array = _this.played_tracks_array = [];
             _this.playlist = new models.Playlist();
-            _this.played_list = new models.Playlist();
+            _this.played_list = new models.Playlist();            
             iterateThroughOrigPlaylist(stars);
           }
 
@@ -647,6 +650,7 @@
           });
 
           _this.player.observe(models.EVENT.CHANGE, function(event) {
+            log(event.data);
             _this.worker.postMessage(_(event.data).pairs().object().value());
           });
         }
