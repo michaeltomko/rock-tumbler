@@ -62,7 +62,7 @@
     #wrapper {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
     #header {text-align:center;}
     #buttons {text-align:center;margin-top:150px;}
-    #switchboard {margin-bottom:30px;}
+    #switchboard {margin:30px 0;}
 
     /* Text */
     h1 {
@@ -352,6 +352,14 @@
          color:rgba(75, 75, 75, 0.65);
          text-shadow:none;
        }
+       .switch {
+         width:40px;
+         float:left;
+         margin-left:10px;
+       }
+       .switch p {
+         text-align:center;
+       }
   </style>
   <link rel="stylesheet" type="text/css" href="/css/chardinjs.css">  
 </head>
@@ -361,14 +369,25 @@
       <div id="header">
         <h1>Rock Tumbler</h1>
       </div>
-      <div id="switchboard">
-        <span class="toggle">
-          <input id="help" type="checkbox">
-          <label data-off="&#10006;" data-on="&#10004;"></label>
-        </span>
-      </div>
       <div id="drop_box" class="" data-intro="Drop any playlist here to get started." data-position="bottom"><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
       <div id="player" data-intro="Then just listen to your brains out." data-position="bottom"></div>
+      <div class="clearfix"></div>
+      <div id="switchboard">
+        <div class="switch">
+          <span class="toggle">
+            <input id="help" type="checkbox">
+            <label data-off="&#10006;" data-on="&#10004;"></label>
+          </span>
+          <p>Help</p>
+        </div>
+        <div class="switch">
+          <span class="toggle">
+            <input id="help" type="checkbox" checked="true">
+            <label data-off="&#10006;" data-on="&#10004;"></label>
+          </span>
+          <p>Stars</p>
+        </div>
+      </div>
       <div class="clearfix"></div>
       <div id="original-tracks-list"></div>
       <div id="played-tracks-list"></div>
