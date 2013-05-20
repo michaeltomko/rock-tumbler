@@ -307,7 +307,8 @@
           _this.played_tracks_array = [];
           _this.local_storage = getLocalStorage();
           _this.r = new RandomizerArray(_this.orig_playlist.length);
-          _this.n = new NextHandler(600);
+          _this.nextAgent = new timeoutHandler(600);
+          _this.changeAgent = new timeoutHandler(500);
           bindKeys();
         }
 
@@ -365,7 +366,7 @@
         }
 
         this.ended = function() {
-          _this.n.clearTimer();
+          _this.nextAgent.clearTimer();
           to_remove = _this.track_array.splice(0,_this.playlist.length);
           Lazy(to_remove).each(function(track){_this.expireTrack(track);});
           _this.ui.completedMessage();
@@ -385,8 +386,8 @@
         this.respond = {
           initial:    function() {},
           play:     function() {},
-          next:    function() { _this.n.setTimer(_this); },
-          previous:     function() { _this.n.setTimer(_this); },
+          next:    function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
+          previous:     function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
           ended: function() { _this.ended(); },
           jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
           shuffle: function() { disableShuffle(); }
@@ -426,11 +427,11 @@
 
         function initializeObservers() {
           _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-            checkForRemovedTracks();
+            _this.changeAgent.setTimer(function(){checkForRemovedTracks()});
           });
 
           _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            checkForAddedTracks();
+            _this.changeAgent.setTimer(function(){checkForAddedTracks()});
           });
 
           _this.playlist.observe(models.EVENT.CHANGE, function(event) {
@@ -571,24 +572,23 @@
         }
       }
 
-      // Handler for Next Events
-      function NextHandler(timeout) {
+      function timeoutHandler(timeout) {
         var _this = this,count,to_remove,eventTimeoutId;
 
         this.indexCounter = 0;
         this.timeoutThreshold = timeout;
 
-        this.setTimer = function(rt) {
+        this.setTimer = function(callback) {
           clearTimeout(eventTimeoutId);
-          eventTimeoutId = setTimeout(function() { onTimeout(rt) }, _this.timeoutThreshold);
+          eventTimeoutId = setTimeout(function() { onTimeout(callback) }, _this.timeoutThreshold);
         }
 
         this.clearTimer = function() {
           clearTimeout(eventTimeoutId);
         }
 
-        function onTimeout(rt) {
-          rt.checkExpiration();
+        function onTimeout(callback) {
+          callback.call();
         }
       }
 
