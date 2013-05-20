@@ -415,20 +415,22 @@
       <script id="worker" type="javascript/worker">
         var msg;
         self.onmessage = function(event) {
-          if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
+          if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
             msg = "initial";
-          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
+          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
             msg = "play";
-          } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
+          } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
             msg = "ended";
-          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume) {
+          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
             msg = "previous";
-          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
+          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
             msg = "next";
-          } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume) {
+          } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
             msg = "jumped";
-          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && event.data.shuffle && !event.data.volume) {
+          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && event.data.shuffle && !event.data.volume && !event.data.repeat) {
             msg = "shuffle";
+          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume && event.data.repeat) {
+            msg = "repeat";
           }
           self.postMessage(msg);
         }
@@ -469,6 +471,7 @@
         this.setupPlaylists = function() {
           var track,track_uri,stars;
           disableShuffle();
+          disableRepeat();
           _this.expireObservers();
 
           _this.local_storage = getLocalStorage();
@@ -481,12 +484,15 @@
 
           iterateThroughOrigPlaylist(stars);
 
-          if (_this.track_array.length == 0 && stars == "no_stars") {
-            $('#stars').attr('checked', true);
-            stars = "stars";
+          if (_this.track_array.length == 0) {
+            if (stars == "no_stars") {
+              $('#stars').attr('checked', true);
+              stars = "stars";
+            }
+            _this.local_storage = getLocalStorage();
             _this.track_array = _this.played_tracks_array = [];
             _this.playlist = new models.Playlist();
-            _this.played_list = new models.Playlist();
+            _this.played_list = new models.Playlist();            
             iterateThroughOrigPlaylist(stars);
           }
 
@@ -575,7 +581,8 @@
           previous: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
           ended: function() { _this.ended(); },
           jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
-          shuffle: function() { disableShuffle(); }
+          shuffle: function() { disableShuffle(); },
+          repeat: function() { disableRepeat(); }
         }  
 
         this.starAction = {
@@ -609,6 +616,10 @@
           _this.player.shuffle = false;
         }
 
+        function disableRepeat() {
+          _this.player.repeat = false;
+        }
+
         function RandomizerArray(length) {
           this.length = length;
           this.result = Lazy.range(this.length).shuffle();
@@ -639,6 +650,7 @@
           });
 
           _this.player.observe(models.EVENT.CHANGE, function(event) {
+            log(event.data);
             _this.worker.postMessage(_(event.data).pairs().object().value());
           });
         }
