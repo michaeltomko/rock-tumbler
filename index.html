@@ -472,7 +472,7 @@
           main = _.map(main.tracks,function(track){return track.data.uri});
           comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
           comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
-          return Lazy(main).difference(comp1).difference(comp2);
+          return Lazy(main).difference(comp1).difference(comp2).toArray();
         }
 
         function setContextAndPlay() {
