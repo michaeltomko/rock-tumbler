@@ -29,6 +29,7 @@ Rock Tumbler takes the pain out of listening to playlists in Spotify. Some might
 Feel free to contact me at: [tomko@theablefew.com](mailto://tomko@theablefew.com)
 
 ## Release History
+* __2013/05/16__ - _0.6.0_ - Added tutorial. CMD+SHIFT+S now stars currently playing track (CTRL+SHIFT+S on Windows). Autoplay is now optional. User can now have starred tracks removed from the playable list. Cleaned up issues when adding/removing tracks from the original playlist. Implemented Lazy.js for major performance improvements.
 * __2013/05/13__ - _0.5.0_ - Performance improvements and bug fixes.
 * __2013/05/12__ - _0.4.1_ - Critical bug fix.
 * __2013/05/12__ - _0.4.0_ - Lots of bug fixes. Previous button should now work while hitting multiple next events. Playlist and Played List now show track count and playlist duration.
