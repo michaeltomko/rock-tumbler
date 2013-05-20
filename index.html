@@ -387,6 +387,13 @@
           </span>
           <p>Stars</p>
         </div>
+        <div class="switch">
+          <span class="toggle">
+            <input id="autoplay" type="checkbox" checked="true" data-intro="Autoplay the first track? (Default: Yes)" data-position="bottom">
+            <label data-off="&#10006;" data-on="&#10004;"></label>
+          </span>
+          <p>Auto</p>
+        </div>
       </div>
       <div class="clearfix"></div>
       <div id="original-tracks-list"></div>
@@ -455,6 +462,7 @@
           _this.r = new RandomizerArray(_this.orig_playlist.length);
           _this.nextAgent = new timeoutHandler(600);
           _this.changeAgent = new timeoutHandler(500);
+          _this.initialPlay = false;
           bindKeys();
         }
 
@@ -489,7 +497,13 @@
           _this.ui.init(_this);
           _this.ui.placeHTML();
           _this.start_track = _this.playlist.get(0);
-          setTimeout(function() { setContextAndPlay(); }, 500);
+          setTimeout(function() { 
+            if ($('#autoplay').is(':checked')) {
+              setContextAndPlay();
+            } else {
+              setContextButDoNotPlay();
+            }
+          },500);
         }
 
         this.expireObservers = function() {
@@ -535,7 +549,12 @@
         }
 
         this.respond = {
-          initial: function() {},
+          initial: function() {
+            if (!$('#autoplay').is(':checked') && !_this.initialPlay) {
+              _this.player.playing = false;
+              _this.initialPlay = true;
+            }
+          },
           play: function() {},
           next: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
           previous: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
@@ -663,6 +682,11 @@
 
         function setContextAndPlay() {
           _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
+        }
+
+        function setContextButDoNotPlay() {
+          _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
+          _this.player.playing = false;
         }
       }
 
