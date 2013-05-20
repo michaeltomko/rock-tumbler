@@ -449,23 +449,42 @@
 
         function checkForRemovedTracks() {
           var in_playlist,i;
-          Lazy(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list)).each(function(track){   
-            _this.playlist.remove(track);
-            i = Lazy(_this.track_array).indexOf(track);
-            _this.track_array.splice(i,1);             
+          Lazy(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list)).each(function(track){
+            if (_this.player.track.data.uri == track) {
+              _this.player.playing = false;
+              removeTrackFromPlaylist(track);
+              _this.start_track = _this.playlist.get(0);
+              setContextAndPlay();
+            } else {  
+            removeTrackFromPlaylist(track);  
+            }         
           });
           Lazy(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist)).each(function(track){
-            _this.played_list.remove(track);
-            i = Lazy(_this.played_tracks_array).indexOf(track);
-            _this.played_tracks_array.splice(i,1);
+            removeTrackFromPlayedList(track);
           });
         }
 
         function checkForAddedTracks() {
           Lazy(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list)).each(function(track){
-            _this.playlist.add(track);
-            _this.track_array.push(track);
+            addTrackToPlaylist(track);
           });
+        }
+
+        function removeTrackFromPlaylist(track) {
+          _this.playlist.remove(track);
+          i = Lazy(_this.track_array).indexOf(track);
+          _this.track_array.splice(i,1);
+        }
+
+        function removeTrackFromPlayedList(track) {
+          _this.played_list.remove(track);
+          i = Lazy(_this.played_tracks_array).indexOf(track);
+          _this.played_tracks_array.splice(i,1);
+        }
+
+        function addTrackToPlaylist(track) {
+          _this.playlist.add(track);
+          _this.track_array.push(track);
         }
 
         function diffBetweenPlaylists(main,comp1,comp2) {
