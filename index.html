@@ -337,7 +337,7 @@
           _this.ui.init(_this);
           _this.ui.placeHTML();
           _this.start_track = _this.playlist.get(0);
-          setTimeout(function() { setContextButDoNotPlay(); }, 500);
+          setTimeout(function() { setContextAndPlay(); }, 500);
         }
 
         this.expireObservers = function() {
@@ -427,20 +427,20 @@
         function initializeObservers() {
           _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
             var in_playlist,i;
-            _.each(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list),function(track){   
+            Lazy(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list)).each(function(track){   
               _this.playlist.remove(track);
-              i = _.indexOf(_this.track_array,track,true);
+              i = Lazy(_this.track_array).indexOf(track);
               _this.track_array.splice(i,1);             
             });
-            _.each(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist),function(track){
+            Lazy(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist)).each(function(track){
               _this.played_list.remove(track);
-              i = _.indexOf(_this.played_tracks_array,track,true);
+              i = Lazy(_this.played_tracks_array).indexOf(track);
               _this.played_tracks_array.splice(i,1);
             });
           });
 
           _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            _.each(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list),function(track){
+            Lazy(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list)).each(function(track){
               _this.playlist.add(track);
               _this.track_array.push(track);
             });
@@ -463,10 +463,10 @@
           main = _.map(main.tracks,function(track){return track.data.uri});
           comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
           comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
-          return _.difference(main,comp1,comp2);
+          return Lazy(main).difference(comp1).difference(comp2);
         }
 
-        function setContextButDoNotPlay() {
+        function setContextAndPlay() {
           _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
         }
       }
