@@ -579,7 +579,7 @@
         }  
 
         this.starAction = {
-          stars: function(track_uri) {addTrackToPlaylist(track_uri);},
+          stars: function(track) {addTrackToPlaylist(track.data.uri);},
           no_stars: function(track) {
             if (track.starred) {
               addTrackToPlayedList(track.data.uri);
