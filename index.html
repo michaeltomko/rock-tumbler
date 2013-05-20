@@ -416,7 +416,7 @@
           this.length = length;
           this.result = Lazy.range(this.length).shuffle();
         }
-        
+
         function bindKeys() {
           Mousetrap.bind('mod+shift+s', function(e) {
             _this.player.track.starred = !_this.player.track.starred;
@@ -426,24 +426,11 @@
 
         function initializeObservers() {
           _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-            var in_playlist,i;
-            Lazy(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list)).each(function(track){   
-              _this.playlist.remove(track);
-              i = Lazy(_this.track_array).indexOf(track);
-              _this.track_array.splice(i,1);             
-            });
-            Lazy(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist)).each(function(track){
-              _this.played_list.remove(track);
-              i = Lazy(_this.played_tracks_array).indexOf(track);
-              _this.played_tracks_array.splice(i,1);
-            });
+            checkForRemovedTracks();
           });
 
           _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            Lazy(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list)).each(function(track){
-              _this.playlist.add(track);
-              _this.track_array.push(track);
-            });
+            checkForAddedTracks();
           });
 
           _this.playlist.observe(models.EVENT.CHANGE, function(event) {
@@ -456,6 +443,27 @@
 
           _this.player.observe(models.EVENT.CHANGE, function(event) {
             _this.worker.postMessage(_(event.data).pairs().object().value());
+          });
+        }
+
+        function checkForRemovedTracks() {
+          var in_playlist,i;
+          Lazy(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list)).each(function(track){   
+            _this.playlist.remove(track);
+            i = Lazy(_this.track_array).indexOf(track);
+            _this.track_array.splice(i,1);             
+          });
+          Lazy(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist)).each(function(track){
+            _this.played_list.remove(track);
+            i = Lazy(_this.played_tracks_array).indexOf(track);
+            _this.played_tracks_array.splice(i,1);
+          });
+        }
+
+        function checkForAddedTracks() {
+          Lazy(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list)).each(function(track){
+            _this.playlist.add(track);
+            _this.track_array.push(track);
           });
         }
 
