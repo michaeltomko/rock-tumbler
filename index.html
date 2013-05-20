@@ -472,23 +472,23 @@
           _this.expireObservers();
 
           _this.local_storage = getLocalStorage();
+
           if ($('#stars').is(':checked')) {
             stars = "stars";
           } else {
             stars = "no_stars";
           }
 
-          Lazy(_this.r.result).each(function(index){
-            track = _this.orig_playlist.get(index);
-            track_uri = track.data.uri;
-            if (Lazy(_this.local_storage).contains(track_uri.replace("spotify:track:","")) && !Lazy(_this.played_tracks_array).contains(track_uri)) { 
-                addTrackToPlayedList(track_uri);  
-            } else {
-              if (!Lazy(_this.track_array).contains(track_uri)) {
-                _this.starAction[stars](track);
-                }
-              }
-          });
+          iterateThroughOrigPlaylist(stars);
+
+          if (_this.track_array.length == 0 && stars == "no_stars") {
+            $('#stars').attr('checked', true);
+            stars = "stars";
+            _this.track_array = _this.played_tracks_array = [];
+            _this.playlist = new models.Playlist();
+            _this.played_list = new models.Playlist();
+            iterateThroughOrigPlaylist(stars);
+          }
 
           _this.start_length = _this.track_array.length;
 
@@ -497,6 +497,7 @@
           _this.ui.init(_this);
           _this.ui.placeHTML();
           _this.start_track = _this.playlist.get(0);
+
           setTimeout(function() { 
             if ($('#autoplay').is(':checked')) {
               setContextAndPlay();
@@ -504,6 +505,20 @@
               setContextButDoNotPlay();
             }
           },500);
+        }
+
+        function iterateThroughOrigPlaylist(stars) {
+          Lazy(_this.r.result).each(function(index){
+            track = _this.orig_playlist.get(index);
+            track_uri = track.data.uri;
+            if (Lazy(_this.local_storage).contains(track_uri.replace("spotify:track:","")) && !Lazy(_this.played_tracks_array).contains(track_uri)) { 
+              addTrackToPlayedList(track_uri);  
+            } else {
+              if (!Lazy(_this.track_array).contains(track_uri)) {
+                _this.starAction[stars](track);
+              }
+            }
+          });
         }
 
         this.expireObservers = function() {
@@ -727,59 +742,59 @@
           _this.playlist_HTML.innerHTML = "<p>You've just completed your entire playlist. Just drop another one in the box above to keep listening.</p><p>Thanks for using Rock Tumbler!</p><p>Sincerely,<br>The Management</p>"
         }
 
-        this.setupDropbox = function() {
-          var drop_box = document.querySelector('#drop_box');
-          var instructions = document.getElementById("instructions");
-          var drop_list = document.getElementById("drop-list");
-          var success_message;
+      this.setupDropbox = function() {
+        var drop_box = document.querySelector('#drop_box');
+        var instructions = document.getElementById("instructions");
+        var drop_list = document.getElementById("drop-list");
+        var success_message;
 
-          drop_box.addEventListener('dragstart', function(e){
-            e.dataTransfer.setData('text/html', this.innerHTML);
-            e.dataTransfer.effectAllowed = 'copy';
-          }, false);
+        drop_box.addEventListener('dragstart', function(e){
+          e.dataTransfer.setData('text/html', this.innerHTML);
+          e.dataTransfer.effectAllowed = 'copy';
+        }, false);
 
-          drop_box.addEventListener('dragenter', function(e){
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-            this.classList.add('over');
-          }, false);
+        drop_box.addEventListener('dragenter', function(e){
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          this.classList.add('over');
+        }, false);
 
-          drop_box.addEventListener('dragover', function(e){
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-            return false;
-          }, false);
+        drop_box.addEventListener('dragover', function(e){
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          return false;
+        }, false);
 
-          drop_box.addEventListener('dragleave', function(e){
-            e.preventDefault();
-            this.classList.remove('over');
-          }, false);
+        drop_box.addEventListener('dragleave', function(e){
+          e.preventDefault();
+          this.classList.remove('over');
+        }, false);
 
-          drop_box.addEventListener('drop', function(e){
-            e.preventDefault(); 
-            var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
-            this.classList.remove('over');
-            instructions.innerHTML = 'Dropped Playlists:';
-            success_message = document.createElement('li');
-            success_message.className = 'playlist-entry';
-            success_message.innerHTML = drop.name;
-            drop_list.appendChild(success_message);
-            setupDroppedPlaylist(drop);
-          }, false);
-        }
+        drop_box.addEventListener('drop', function(e){
+          e.preventDefault(); 
+          var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
+          this.classList.remove('over');
+          instructions.innerHTML = 'Dropped Playlists:';
+          success_message = document.createElement('li');
+          success_message.className = 'playlist-entry';
+          success_message.innerHTML = drop.name;
+          drop_list.appendChild(success_message);
+          setupDroppedPlaylist(drop);
+        }, false);
+      }
 
-        function calculateDuration(d) {
-          d = Number(d);
-          var h = Math.floor(d / 3600);
-          var m = Math.floor(d % 3600 / 60);
-          var s = Math.floor(d % 3600 % 60);
-          return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 && m < 10 ? "0" : "") + m + ":" : "0:") + (s < 10 ? "0" : "") + s);
-        }
+      function calculateDuration(d) {
+        d = Number(d);
+        var h = Math.floor(d / 3600);
+        var m = Math.floor(d % 3600 / 60);
+        var s = Math.floor(d % 3600 % 60);
+        return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 && m < 10 ? "0" : "") + m + ":" : "0:") + (s < 10 ? "0" : "") + s);
+      }
 
-        function setContext() {
-          _this.player.context = _this.playlist.context = _this.session.playlist;
-          _this.played_list.context = _this.session.played_list;
-        }
+      function setContext() {
+        _this.player.context = _this.playlist.context = _this.session.playlist;
+        _this.played_list.context = _this.session.played_list;
+      }
       }
 
       function timeoutHandler(timeout) {
@@ -892,21 +907,18 @@
         }
       }
 
-      $(document).ready(function()
-                        {
-                          $('#help').change(function()
-                                            {
-                                              if ($(this).is(':checked')) {
-                                                $('body').chardinJs('start');
-                                              } else {
-                                                $('body').chardinJs('stop');
-                                              }
-                                            });
-                                            $('body').on('chardinJs:stop', function() {
-                                              $('#help').attr('checked', false);
-
-                                            });
-                        });
+      $(document).ready(function() {
+        $('#help').change(function() {
+          if ($(this).is(':checked')) {
+            $('body').chardinJs('start');
+          } else {
+            $('body').chardinJs('stop');
+          }
+        });
+        $('body').on('chardinJs:stop', function() {
+          $('#help').attr('checked', false);
+        });
+      });
       </script>
     </div>
   </div>
