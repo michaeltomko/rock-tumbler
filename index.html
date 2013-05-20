@@ -70,7 +70,7 @@
       line-height:1.15;
       font-family:'MenschBoldInline';
       color:rgba(231, 71, 68, 0.4);
-      margin:15px 0 0 ;
+      margin:15px 0 0;
       width:100%;
       text-shadow: 3px 3px 3px rgba(231, 71, 68, 0.1);
       -webkit-transition: all 2s ease-out;
@@ -369,7 +369,7 @@
       <div id="header">
         <h1>Rock Tumbler</h1>
       </div>
-      <div id="drop_box" class="" data-intro="Drop any playlist here to get started." data-position="bottom"><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
+      <div id="drop_box" class="" data-intro="Drop any playlist here to get started." data-position="right"><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
       <div id="player" data-intro="Then just listen to your brains out." data-position="bottom"></div>
       <div class="clearfix"></div>
       <div id="switchboard">
@@ -382,7 +382,7 @@
         </div>
         <div class="switch">
           <span class="toggle">
-            <input id="help" type="checkbox" checked="true">
+            <input id="stars" type="checkbox" checked="true" data-intro="Would you like to include starred tracks in your playlist?<br>(Default: Yes)" data-position="right">
             <label data-off="&#10006;" data-on="&#10004;"></label>
           </span>
           <p>Stars</p>
@@ -459,22 +459,27 @@
         }
 
         this.setupPlaylists = function() {
+          var track,track_uri,stars;
           disableShuffle();
           _this.expireObservers();
 
           _this.local_storage = getLocalStorage();
+          if ($('#stars').is(':checked')) {
+            stars = "stars";
+          } else {
+            stars = "no_stars";
+          }
 
           Lazy(_this.r.result).each(function(index){
-            track_uri = _this.orig_playlist.get(index).data.uri;
-            if (Lazy(_this.local_storage).contains(track_uri.replace("spotify:track:","")) && !Lazy(_this.played_tracks_array).contains(track_uri)) {
-              _this.played_list.add(models.Track.fromURI(track_uri));
-              _this.played_tracks_array.push(track_uri);
+            track = _this.orig_playlist.get(index);
+            track_uri = track.data.uri;
+            if (Lazy(_this.local_storage).contains(track_uri.replace("spotify:track:","")) && !Lazy(_this.played_tracks_array).contains(track_uri)) { 
+                addTrackToPlayedList(track_uri);  
             } else {
               if (!Lazy(_this.track_array).contains(track_uri)) {
-                _this.playlist.add(models.Track.fromURI(track_uri));
-                _this.track_array.push(track_uri);
+                _this.starAction[stars](track);
+                }
               }
-            }
           });
 
           _this.start_length = _this.track_array.length;
@@ -530,14 +535,25 @@
         }
 
         this.respond = {
-          initial:    function() {},
-          play:     function() {},
-          next:    function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
-          previous:     function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
+          initial: function() {},
+          play: function() {},
+          next: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
+          previous: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
           ended: function() { _this.ended(); },
           jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
           shuffle: function() { disableShuffle(); }
         }  
+
+        this.starAction = {
+          stars: function(track_uri) {addTrackToPlaylist(track_uri);},
+          no_stars: function(track) {
+            if (track.starred) {
+              addTrackToPlayedList(track.data.uri);
+            } else {
+              addTrackToPlaylist(track.data.uri);
+            }
+          }
+        }
 
         function getLocalStorage() {
           if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
@@ -631,6 +647,11 @@
         function addTrackToPlaylist(track) {
           _this.playlist.add(track);
           _this.track_array.push(track);
+        }
+
+        function addTrackToPlayedList(track) {
+          _this.played_list.add(track);
+          _this.played_tracks_array.push(track);
         }
 
         function diffBetweenPlaylists(main,comp1,comp2) {
