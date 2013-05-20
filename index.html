@@ -234,7 +234,8 @@
          -o-transition: all 0.3s ease-out;  /* Opera 10.50–12.00 */
          transition: all 0.3s ease-out;  /* Chrome 26, Firefox 16+, IE 10+, Opera 12.10+ */
        }
-  </style>    
+  </style>
+  <link rel="stylesheet" type="text/css" href="/css/chardin.css">  
 </head>
 <body>
   <div id="wrapper">
@@ -242,7 +243,7 @@
       <div id="header">
         <h1>Rock Tumbler</h1>
       </div>
-      <div id="drop_box" class=""><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
+      <div id="drop_box" data-intro="Testing!" data-position="right" class=""><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
       <div id="player"></div>
       <div class="clearfix"></div>
       <div id="original-tracks-list"></div>
@@ -259,6 +260,7 @@
       <script src="/js/lodash.min.js"></script>
       <script src="/js/log.js"></script>
       <script src="/js/mousetrap.min.js"></script>
+      <script src="/js/chardin.min.js"></script>
       <script id="worker" type="javascript/worker">
         var msg;
         self.onmessage = function(event) {
@@ -456,7 +458,7 @@
               _this.start_track = _this.playlist.get(0);
               setContextAndPlay();
             } else {  
-            removeTrackFromPlaylist(track);  
+              removeTrackFromPlaylist(track);  
             }         
           });
           Lazy(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist)).each(function(track){
