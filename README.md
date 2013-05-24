@@ -20,6 +20,8 @@ Rock Tumbler takes the pain out of listening to playlists in Spotify. Some might
 
 * When on the app screen, `CMD+OPT+R` will reload the app.
 
+* When the app is in focus, `CMD+SHIFT+S` (Mac) or `CTRL+SHIFT+S` (Win) will __star__ the currently playing track. (Note, this sometimes briefly causes a spinning beach ball on really large playlists while the UI redraws itself.)
+
 * You can drop as many playlists into the dropbox as you wish. Rock Tumbler will play the last playlist dropped and will ignore duplicate drops.
 
 * Rock Tumbler keeps track of changes that you make to your playlists — like adding and removing tracks — and will even keep your history if you rename a playlist.
@@ -29,6 +31,7 @@ Rock Tumbler takes the pain out of listening to playlists in Spotify. Some might
 Feel free to contact me at: [tomko@theablefew.com](mailto://tomko@theablefew.com)
 
 ## Release History
+* __2013/05/24__ - _0.7.0_ - UI adjustments. Bug fixes. Corrected issue with toggle buttons getting stuck.
 * __2013/05/24__ - _0.6.4_ - Fixed issue with removing starred tracks. Cooled down memory leak.
 * __2013/05/19__ - _0.6.3_ - Something weird happened. Had to fix it.
 * __2013/05/19__ - _0.6.2_ - Critical bug fix. Disabled repeat upon drop and event.

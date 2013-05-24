@@ -62,7 +62,7 @@
     #wrapper {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
     #header {text-align:center;}
     #buttons {text-align:center;margin-top:150px;}
-    #switchboard {margin:30px 0;}
+    #switchboard {margin:0 20px 0 0; float:left; width:40px;}
 
     /* Text */
     h1 {
@@ -107,7 +107,7 @@
        #player:empty {width:242px; height:242px; border:4px dashed rgba(75, 75, 75, 0.65);}
 
        /* Drop Box */
-       #drop_box {float:left;width:600px;border:4px dashed rgba(75, 75, 75, 0.65);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out;}
+       #drop_box {float:left;width:542px;border:4px dashed rgba(75, 75, 75, 0.65);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out; margin:0 20px 0 0;}
        #drop_box.over {border-color:rgba(231, 71, 68, 0.5);-webkit-transition: all 0.65s ease-out;}
 
        #original-tracks-list {margin-top:25px;}
@@ -354,11 +354,12 @@
        }
        .switch {
          width:40px;
-         float:left;
-         margin-left:10px;
+         float: left;
+          margin: 0 0 2px 0;
        }
        .switch p {
          text-align:center;
+         margin: 0;
        }
   </style>
   <link rel="stylesheet" type="text/css" href="/css/chardinjs.css">  
@@ -369,20 +370,17 @@
       <div id="header">
         <h1>Rock Tumbler</h1>
       </div>
-      <div id="drop_box" class="" data-intro="Drop any playlist here to get started." data-position="right"><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
-      <div id="player" data-intro="Then just listen to your brains out." data-position="bottom"></div>
-      <div class="clearfix"></div>
       <div id="switchboard">
         <div class="switch">
           <span class="toggle">
-            <input id="stars" type="checkbox" data-intro="Would you like to include starred tracks in your playlist?<br>(Default: Yes)" data-position="right">
+            <input id="stars" type="checkbox" data-intro="Would you like to include starred tracks in your playlist?<br>(Default: Yes)" data-position="bottom">
             <label data-off="&#10006;" data-on="&#10004;"></label>
           </span>
           <p>Stars</p>
         </div>
         <div class="switch">
           <span class="toggle">
-            <input id="autoplay" type="checkbox" data-intro="Autoplay the first track? (Default: Yes)" data-position="bottom">
+            <input id="autoplay" type="checkbox" data-intro="Autoplay the first track? (Default: Yes)" data-position="right">
             <label data-off="&#10006;" data-on="&#10004;"></label>
           </span>
           <p>Auto</p>
@@ -395,6 +393,8 @@
           <p>Help</p>
         </div>
       </div>
+      <div id="drop_box" class="" data-intro="Drop any playlist here to get started." data-position="bottom"><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
+      <div id="player" data-intro="Then just listen to your brains out." data-position="bottom"></div>
       <div class="clearfix"></div>
       <div id="original-tracks-list"></div>
       <div id="played-tracks-list"></div>
@@ -486,7 +486,7 @@
 
           if (_this.track_array.length == 0) {
             if (stars == "no_stars") {
-              $('#stars').attr('checked', true);
+              $('#stars').prop('checked', true);
               stars = "stars";
             }
             _this.local_storage = getLocalStorage();
@@ -649,7 +649,6 @@
           });
 
           _this.player.observe(models.EVENT.CHANGE, function(event) {
-            log(event.data);
             _this.worker.postMessage(_(event.data).pairs().object().value());
           });
         }
@@ -919,6 +918,8 @@
       }
 
       $(document).ready(function() {
+        $('#stars').prop('checked', true);
+        $('#autoplay').prop('checked', true);
         $('#help').change(function() {
           if ($(this).is(':checked')) {
             $('body').chardinJs('start');
@@ -927,7 +928,7 @@
           }
         });
         $('body').on('chardinJs:stop', function() {
-          $('#help').attr('checked', false);
+          $('#help').prop('checked', false);
         });
       });
       </script>
