@@ -62,7 +62,7 @@
     .container {position: relative;width: 100%;min-height: 100%;margin: 0;padding: 0;}
     .content {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 0;}
     .head {}
-    .dash {padding: 30px 0;background-color: rgba(75, 75, 75, 0.1);background-image: url('img/squairy_light_@2X.png');background-size: 200px 200px;border-top: 1px solid rgba(75, 75, 75, 0.115);border-bottom: 1px solid rgba(75, 75, 75, 0.115);}
+    .dash {padding: 30px 0;background-color: rgba(75, 75, 75, 0.1);background-image: url('img/squairy_light_@2X.png');background-size: 200px 200px;border-top: 1px solid rgba(75, 75, 75, 0.115);border-bottom: 1px solid rgba(75, 75, 75, 0.115);box-shadow: inset 1px 1px 2px rgba(75, 75, 75, 0.049);}
     .playlists {}
     #header {text-align:center;}
     #buttons {text-align:center;margin-top:150px;}
@@ -108,10 +108,10 @@
        #player {min-height:140px; float:right;}
        #player .sp-player {float:left;width:248px;height:248px;border:1px solid rgba(75, 75, 75, 0.15);}
        #player .sp-list {width:inherit;max-height:inherit;}
-       #player:empty {width:242px; height:242px; border:4px dashed rgba(75, 75, 75, 0.45);}
+       #player:empty {width:242px; height:242px; border:4px dashed rgba(75, 75, 75, 0.2);}
 
        /* Drop Box */
-       #drop_box {float:left;width:542px;border:4px dashed rgba(75, 75, 75, 0.45);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out; margin:0 20px 0 0;}
+       #drop_box {float:left;width:542px;border:4px dashed rgba(75, 75, 75, 0.2);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out; margin:0 20px 0 0;}
        #drop_box.over {border-color:rgba(231, 71, 68, 0.5);-webkit-transition: all 0.65s ease-out;}
 
        #original-tracks-list {margin-top:25px;}
@@ -119,7 +119,7 @@
        .sp-player-image {
          border-radius:0;
          box-shadow:none;
-         opacity:0.85;
+         opacity:0.6;
          -webkit-transition: all 0.3s ease-out;
        }
        .sp-list {
@@ -128,7 +128,7 @@
        }
        .sp-player-image:hover,.sp-list:hover {
          opacity:1;
-         -webkit-transition: all 0.3s ease-out;
+         -webkit-transition: all 0.25s ease-out;
        }
 
        .sp-list .sp-item {
