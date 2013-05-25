@@ -58,8 +58,12 @@
 
     /* Main Elements */
     html {-webkit-user-select: auto;}
-    body {min-height: 100%;padding: 10px 0 20px;box-sizing: border-box; background-image:url(img/squairy_light_@2X.png); background-size:200px 200px; color:rgba(75, 75, 75, 0.8); font-family:"Lucida Grande", "Tahoma", "Arial", sans-serif; text-rendering: optimizeLegibility;-webkit-transform: translate3d(0,0,0);-moz-transform: translate3d(0,0,0);-ms-transform: translate3d(0,0,0);-o-transform: translate3d(0,0,0);transform: translate3d(0,0,0);}
-    #wrapper {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 20px;}
+    body {min-height: 100%;top:0;left:0;padding: 15px 0 20px;box-sizing: border-box; background-image:url(img/gray_jean_@2X.jpg); background-size:150px 150px; color:rgba(75, 75, 75, 0.8); font-family:"Lucida Grande", "Tahoma", "Arial", sans-serif; text-rendering: optimizeLegibility;-webkit-transform: translate3d(0,0,0);-moz-transform: translate3d(0,0,0);-ms-transform: translate3d(0,0,0);-o-transform: translate3d(0,0,0);transform: translate3d(0,0,0);}
+    .container {position: relative;width: 100%;min-height: 100%;margin: 0;padding: 0;}
+    .content {position: relative;max-width: 900px;min-height: 100%;margin: 0 auto;padding: 0;}
+    .head {}
+    .dash {padding: 30px 0;background-color: rgba(75, 75, 75, 0.1);background-image: url('img/squairy_light_@2X.png');background-size: 200px 200px;border-top: 1px solid rgba(75, 75, 75, 0.115);border-bottom: 1px solid rgba(75, 75, 75, 0.115);box-shadow: inset 1px 1px 2px rgba(75, 75, 75, 0.049);}
+    .playlists {}
     #header {text-align:center;}
     #buttons {text-align:center;margin-top:150px;}
     #switchboard {margin:0 20px 0 0; float:left; width:40px;}
@@ -70,7 +74,7 @@
       line-height:1.15;
       font-family:'MenschBoldInline';
       color:rgba(231, 71, 68, 0.4);
-      margin:15px 0 0;
+      margin:20px 0 0;
       width:100%;
       text-shadow: 3px 3px 3px rgba(231, 71, 68, 0.1);
       -webkit-transition: all 2s ease-out;
@@ -102,12 +106,12 @@
        }
        /* Player */
        #player {min-height:140px; float:right;}
-       #player .sp-player {float:left;width:250px;height:250px;}
+       #player .sp-player {float:left;width:248px;height:248px;border:1px solid rgba(75, 75, 75, 0.15);}
        #player .sp-list {width:inherit;max-height:inherit;}
-       #player:empty {width:242px; height:242px; border:4px dashed rgba(75, 75, 75, 0.65);}
+       #player:empty {width:242px; height:242px; border:4px dashed rgba(75, 75, 75, 0.2);}
 
        /* Drop Box */
-       #drop_box {float:left;width:542px;border:4px dashed rgba(75, 75, 75, 0.65);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out; margin:0 20px 0 0;}
+       #drop_box {float:left;width:542px;border:4px dashed rgba(75, 75, 75, 0.2);height:222px;padding:10px;-webkit-transition: all 0.75s ease-out; margin:0 20px 0 0;}
        #drop_box.over {border-color:rgba(231, 71, 68, 0.5);-webkit-transition: all 0.65s ease-out;}
 
        #original-tracks-list {margin-top:25px;}
@@ -115,7 +119,7 @@
        .sp-player-image {
          border-radius:0;
          box-shadow:none;
-         opacity:0.85;
+         opacity:0.6;
          -webkit-transition: all 0.3s ease-out;
        }
        .sp-list {
@@ -124,7 +128,7 @@
        }
        .sp-player-image:hover,.sp-list:hover {
          opacity:1;
-         -webkit-transition: all 0.3s ease-out;
+         -webkit-transition: all 0.25s ease-out;
        }
 
        .sp-list .sp-item {
@@ -355,7 +359,7 @@
        .switch {
          width:40px;
          float: left;
-          margin: 0 0 2px 0;
+         margin: 0 0 2px 0;
        }
        .switch p {
          text-align:center;
@@ -365,37 +369,45 @@
   <link rel="stylesheet" type="text/css" href="/css/chardinjs.css">  
 </head>
 <body>
-  <div id="wrapper">
-    <div id="index" class="section">
+  <div class="container head">
+    <div class="content">
       <div id="header">
         <h1>Rock Tumbler</h1>
       </div>
-      <div id="switchboard">
-        <div class="switch">
-          <span class="toggle">
-            <input id="stars" type="checkbox" data-intro="Would you like to include starred tracks in your playlist?<br>(Default: Yes)" data-position="bottom">
-            <label data-off="&#10006;" data-on="&#10004;"></label>
-          </span>
-          <p>Stars</p>
+    </div>
+  </div>
+  <div class="container dash">
+    <div class="content">
+        <div id="switchboard">
+          <div class="switch">
+            <span class="toggle">
+              <input id="stars" type="checkbox" data-intro="Would you like to include starred tracks in your playlist?<br>(Default: Yes)" data-position="bottom">
+              <label data-off="&#10006;" data-on="&#10004;"></label>
+            </span>
+            <p>Stars</p>
+          </div>
+          <div class="switch">
+            <span class="toggle">
+              <input id="autoplay" type="checkbox" data-intro="Autoplay the first track? (Default: Yes)" data-position="right">
+              <label data-off="&#10006;" data-on="&#10004;"></label>
+            </span>
+            <p>Auto</p>
+          </div>
+          <div class="switch">
+            <span class="toggle">
+              <input id="help" type="checkbox">
+              <label data-off="&#10006;" data-on="&#10004;"></label>
+            </span>
+            <p>Help</p>
+          </div>
         </div>
-        <div class="switch">
-          <span class="toggle">
-            <input id="autoplay" type="checkbox" data-intro="Autoplay the first track? (Default: Yes)" data-position="right">
-            <label data-off="&#10006;" data-on="&#10004;"></label>
-          </span>
-          <p>Auto</p>
-        </div>
-        <div class="switch">
-          <span class="toggle">
-            <input id="help" type="checkbox">
-            <label data-off="&#10006;" data-on="&#10004;"></label>
-          </span>
-          <p>Help</p>
-        </div>
-      </div>
-      <div id="drop_box" class="" data-intro="Drop any playlist here to get started." data-position="bottom"><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
-      <div id="player" data-intro="Then just listen to your brains out." data-position="bottom"></div>
+        <div id="drop_box" class="" data-intro="Drop any playlist here to get started." data-position="bottom"><h4 id="instructions">Drop any playlist here to get started.</h4><ol id="drop-list"></ol></div>
+        <div id="player" data-intro="Then just listen to your brains out." data-position="bottom"></div>
       <div class="clearfix"></div>
+    </div>
+  </div>
+  <div class="container playlists">
+    <div class="content">
       <div id="original-tracks-list"></div>
       <div id="played-tracks-list"></div>
       <div id="buttons">
@@ -405,534 +417,535 @@
         <input type="button" class="btn btn-mini" id="detonate-this" value="Detonate This Playlist">
         <input type="button" class="btn btn-mini" id="detonate-all" value="Detonate All Playlists">
       </div>
-      <script src="/js/jquery-2.0.0.min.js"></script>
-      <script src="/js/lazy.min.js"></script>
-      <script src="/js/lazy.dom.min.js"></script>
-      <script src="/js/lodash.min.js"></script>
-      <script src="/js/log.js"></script>
-      <script src="/js/mousetrap.min.js"></script>
-      <script src="/js/chardinjs.min.js"></script>
-      <script id="worker" type="javascript/worker">
-        var msg;
-        self.onmessage = function(event) {
-          if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
-            msg = "initial";
-          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
-            msg = "play";
-          } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
-            msg = "ended";
-          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
-            msg = "previous";
-          } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
-            msg = "next";
-          } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
-            msg = "jumped";
-          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && event.data.shuffle && !event.data.volume && !event.data.repeat) {
-            msg = "shuffle";
-          } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume && event.data.repeat) {
-            msg = "repeat";
-          }
-          self.postMessage(msg);
-        }
-      </script>
-      <script>
-        // Session Object
-      function RockTumblerSession() {
-        var _this = this,i,t,to_remove,track_uri;
-
-        this.ui = new RockTumblerUI();
-        this.ui.setupDropbox();
-
-        this.player = models.player;
-        this.player.shuffle = false;
-        this.start_track = null;
-
-        var blob = new Blob([document.querySelector('#worker').textContent]);
-        this.worker = new Worker(window.URL.createObjectURL(blob));
-
-        this.worker.onmessage = function(e) {
-          _this.respond[e.data]();
-        }
-
-        this.init = function(drop) {
-          _this.orig_playlist = models.Playlist.fromURI(drop);
-          _this.playlist = new models.Playlist();
-          _this.played_list = new models.Playlist();
-          _this.track_array = [];
-          _this.played_tracks_array = [];
-          _this.local_storage = getLocalStorage();
-          _this.r = new RandomizerArray(_this.orig_playlist.length);
-          _this.nextAgent = new timeoutHandler(600);
-          _this.changeAgent = new timeoutHandler(500);
-          _this.initialPlay = false;
-          bindKeys();
-        }
-
-        this.setupPlaylists = function() {
-          var track,track_uri,stars;
-          disableShuffle();
-          disableRepeat();
-          _this.expireObservers();
-
-          _this.local_storage = getLocalStorage();
-
-          if ($('#stars').is(':checked')) {
-            stars = "stars";
-          } else {
-            stars = "no_stars";
-          }
-
-          iterateThroughOrigPlaylist(stars);
-
-          if (_this.track_array.length == 0) {
-            if (stars == "no_stars") {
-              $('#stars').prop('checked', true);
-              stars = "stars";
-            }
-            _this.local_storage = getLocalStorage();
-            _this.track_array = _this.played_tracks_array = [];
-            _this.playlist = new models.Playlist();
-            _this.played_list = new models.Playlist();            
-            iterateThroughOrigPlaylist(stars);
-          }
-          _this.start_length = _this.track_array.length;
-
-          initializeObservers();
-
-          _this.ui.init(_this);
-          _this.ui.placeHTML();
-          _this.start_track = _this.playlist.get(0);
-
-          setTimeout(function() { 
-            if ($('#autoplay').is(':checked')) {
-              setContextAndPlay();
-            } else {
-              setContextButDoNotPlay();
-            }
-          },500);
-        }
-
-        function iterateThroughOrigPlaylist(stars) {
-          Lazy(_this.r.result).each(function(index){
-            track = _this.orig_playlist.get(index);
-            track_uri = track.data.uri;
-            if (Lazy(_this.local_storage).contains(track_uri.replace("spotify:track:","")) && !Lazy(_this.played_tracks_array).contains(track_uri)) { 
-              addTrackToPlayedList(track_uri);  
-            } else {
-              if (!Lazy(_this.track_array).contains(track_uri)) {
-                _this.starAction[stars](track);
-              }
-            }
-          });
-        }
-
-        this.expireObservers = function() {
-          _this.orig_playlist.ignore(models.EVENT.ITEMS_REMOVED);
-          _this.orig_playlist.ignore(models.EVENT.ITEMS_ADDED);
-          _this.playlist.ignore(models.EVENT.CHANGE);
-          _this.played_list.ignore(models.EVENT.CHANGE);
-          _this.player.ignore(models.EVENT.CHANGE);
-        }
-
-        this.expireTrack = function(track) {
-          _this.local_storage.push(track.replace("spotify:track:",""));
-          localStorage[_this.orig_playlist.data.uri] = lzw_encode(_this.local_storage);
-          _this.playlist.remove(track);
-          _this.played_list.add(track);
-          _this.played_tracks_array.push(track);
-        }
-
-        this.checkExpiration = function() {
-          var index = _this.playlist.indexOf(rt.player.track);
-          if (index > 0) {
-            to_remove = _this.track_array.splice(0,index);
-            Lazy(to_remove).each(function(track){_this.expireTrack(track);});
-          }
-        }
-
-        this.ended = function() {
-          _this.nextAgent.clearTimer();
-          to_remove = _this.track_array.splice(0,_this.playlist.length);
-          Lazy(to_remove).each(function(track){_this.expireTrack(track);});
-          _this.ui.completedMessage();
-        }
-
-        this.moveCurrentTrackToHead = function() {
-          i = _this.playlist.indexOf(_this.player.track.data.uri);
-          t = _this.track_array.splice(i,1);
-          _this.track_array.unshift(Lazy(t).first());
-          _this.playlist.data.move(_this.player.track.data.uri,0);
-          if (_this.track_array.length != _this.start_length) {
-            _this.expireTrack(_this.playlist.get(1).uri);
-            _this.track_array.splice(1,1);
-          }
-        }
-
-        this.respond = {
-          initial: function() {
-            if (!$('#autoplay').is(':checked') && !_this.initialPlay) {
-              _this.player.playing = false;
-              _this.initialPlay = true;
-            }
-          },
-          play: function() {},
-          next: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
-          previous: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
-          ended: function() { _this.ended(); },
-          jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
-          shuffle: function() { disableShuffle(); },
-          repeat: function() { disableRepeat(); }
-        }  
-
-        this.starAction = {
-          stars: function(track) {addTrackToPlaylist(track.data.uri);},
-          no_stars: function(track) {
-            if (track.starred) {
-              addTrackToPlayedList(track.data.uri);
-            } else {
-              addTrackToPlaylist(track.data.uri);
-            }
-          }
-        }
-
-        function getLocalStorage() {
-          if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
-            localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
-            localStorage.removeItem(_this.orig_playlist.name);
-          }
-
-          try {
-            if (_this.local_storage.length==_this.orig_playlist.length) {
-              localStorage.removeItem(_this.orig_playlist.data.uri);
-            }
-          } catch(err) {
-          }
-
-          return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? lzw_decode(localStorage[_this.orig_playlist.data.uri]).split(",") : [];
-        }
-
-        function disableShuffle() {
-          _this.player.shuffle = false;
-        }
-
-        function disableRepeat() {
-          _this.player.repeat = false;
-        }
-
-        function RandomizerArray(length) {
-          this.length = length;
-          this.result = Lazy.range(this.length).shuffle();
-        }
-
-        function bindKeys() {
-          Mousetrap.bind('mod+shift+s', function(e) {
-            _this.player.track.starred = !_this.player.track.starred;
-            return false;
-          });
-        }
-
-        function initializeObservers() {
-          _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
-            _this.changeAgent.setTimer(function(){checkForRemovedTracks()});
-          });
-
-          _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
-            _this.changeAgent.setTimer(function(){checkForAddedTracks()});
-          });
-
-          _this.playlist.observe(models.EVENT.CHANGE, function(event) {
-            _this.ui.updatePlaylistMeta();
-          });
-
-          _this.played_list.observe(models.EVENT.CHANGE, function(event) {
-            _this.ui.updatePlaylistMeta();
-          });
-
-          _this.player.observe(models.EVENT.CHANGE, function(event) {
-            _this.worker.postMessage(_(event.data).pairs().object().value());
-          });
-        }
-
-        function checkForRemovedTracks() {
-          var in_playlist,i;
-          Lazy(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list)).each(function(track){
-            if (_this.player.track.data.uri == track) {
-              _this.player.playing = false;
-              removeTrackFromPlaylist(track);
-              _this.start_track = _this.playlist.get(0);
-              setContextAndPlay();
-            } else {  
-              removeTrackFromPlaylist(track);  
-            }         
-          });
-          Lazy(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist)).each(function(track){
-            removeTrackFromPlayedList(track);
-          });
-        }
-
-        function checkForAddedTracks() {
-          Lazy(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list)).each(function(track){
-            addTrackToPlaylist(track);
-          });
-        }
-
-        function removeTrackFromPlaylist(track) {
-          _this.playlist.remove(track);
-          i = Lazy(_this.track_array).indexOf(track);
-          _this.track_array.splice(i,1);
-        }
-
-        function removeTrackFromPlayedList(track) {
-          _this.played_list.remove(track);
-          i = Lazy(_this.played_tracks_array).indexOf(track);
-          _this.played_tracks_array.splice(i,1);
-        }
-
-        function addTrackToPlaylist(track) {
-          _this.playlist.add(track);
-          _this.track_array.push(track);
-        }
-
-        function addTrackToPlayedList(track) {
-          _this.played_list.add(track);
-          _this.played_tracks_array.push(track);
-        }
-
-        function diffBetweenPlaylists(main,comp1,comp2) {
-          main = _.map(main.tracks,function(track){return track.data.uri});
-          comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
-          comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
-          return Lazy(main).difference(comp1).difference(comp2).toArray();
-        }
-
-        function setContextAndPlay() {
-          _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
-        }
-
-        function setContextButDoNotPlay() {
-          _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
-          _this.player.playing = false;
-        }
-      }
-
-      // UI Handler
-      function RockTumblerUI() {
-        var _this = this,hours,minutes,seconds;
-
-        this.playlist_HTML = document.getElementById('original-tracks-list');
-        this.played_list_HTML = document.getElementById('played-tracks-list');
-        this.player_HTML = document.getElementById('player');
-
-        this.init = function(rt) {
-          _this.session = rt;
-          _this.playlist = new views.List(_this.session.playlist);
-          _this.played_list = new views.List(_this.session.played_list);
-          _this.playlist.track = _this.played_list.track = null;
-          _this.player = new views.Player();
-          setContext();
-        }
-
-        this.placeHTML = function() {
-          _this.playlist_HTML.innerHTML = _this.played_list_HTML.innerHTML = _this.player_HTML.innerHTML = '';
-          _this.playlist_HTML.innerHTML = "<p id='playlist_meta'><strong>Playlist:</strong> " + _this.session.playlist.length + " Tracks | " + calculateDuration(_this.session.playlist.data.getDuration()) + "</p>";
-          _this.played_list_HTML.innerHTML = "<p id='played_list_meta'><strong>Played List:</strong>" + _this.session.played_list.length + " Tracks | " + calculateDuration(_this.session.played_list.data.getDuration()) + "</p>";
-          _this.playlist_meta = document.getElementById('playlist_meta');
-          _this.played_list_meta = document.getElementById('played_list_meta');
-          _this.playlist_HTML.appendChild(_this.playlist.node);
-          _this.played_list_HTML.appendChild(_this.played_list.node);
-          _this.player_HTML.appendChild(_this.player.node);
-        }
-
-        this.updatePlaylistMeta = function() {
-          _this.playlist_meta.innerHTML = "<strong>Playlist:</strong> " + _this.session.playlist.length + " Tracks | " + calculateDuration(_this.session.playlist.data.getDuration());
-          _this.played_list_meta.innerHTML = "<strong>Played List:</strong> " + _this.session.played_list.length + " Tracks | " + calculateDuration(_this.session.played_list.data.getDuration());
-        }
-
-        this.completedMessage = function() {
-          _this.playlist_HTML.innerHTML = "<p>You've just completed your entire playlist. Just drop another one in the box above to keep listening.</p><p>Thanks for using Rock Tumbler!</p><p>Sincerely,<br>The Management</p>"
-        }
-
-      this.setupDropbox = function() {
-        var drop_box = document.querySelector('#drop_box');
-        var instructions = document.getElementById("instructions");
-        var drop_list = document.getElementById("drop-list");
-        var success_message;
-
-        drop_box.addEventListener('dragstart', function(e){
-          e.dataTransfer.setData('text/html', this.innerHTML);
-          e.dataTransfer.effectAllowed = 'copy';
-        }, false);
-
-        drop_box.addEventListener('dragenter', function(e){
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'copy';
-          this.classList.add('over');
-        }, false);
-
-        drop_box.addEventListener('dragover', function(e){
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'copy';
-          return false;
-        }, false);
-
-        drop_box.addEventListener('dragleave', function(e){
-          e.preventDefault();
-          this.classList.remove('over');
-        }, false);
-
-        drop_box.addEventListener('drop', function(e){
-          e.preventDefault(); 
-          var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
-          this.classList.remove('over');
-          instructions.innerHTML = 'Dropped Playlists:';
-          success_message = document.createElement('li');
-          success_message.className = 'playlist-entry';
-          success_message.innerHTML = drop.name;
-          drop_list.appendChild(success_message);
-          setupDroppedPlaylist(drop);
-        }, false);
-      }
-
-      function calculateDuration(d) {
-        d = Number(d);
-        var h = Math.floor(d / 3600);
-        var m = Math.floor(d % 3600 / 60);
-        var s = Math.floor(d % 3600 % 60);
-        return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 && m < 10 ? "0" : "") + m + ":" : "0:") + (s < 10 ? "0" : "") + s);
-      }
-
-      function setContext() {
-        _this.player.context = _this.playlist.context = _this.session.playlist;
-        _this.played_list.context = _this.session.played_list;
-      }
-      }
-
-      function timeoutHandler(timeout) {
-        var _this = this,count,to_remove,eventTimeoutId;
-
-        this.indexCounter = 0;
-        this.timeoutThreshold = timeout;
-
-        this.setTimer = function(callback) {
-          clearTimeout(eventTimeoutId);
-          eventTimeoutId = setTimeout(function() { onTimeout(callback) }, _this.timeoutThreshold);
-        }
-
-        this.clearTimer = function() {
-          clearTimeout(eventTimeoutId);
-        }
-
-        function onTimeout(callback) {
-          callback.call();
-        }
-      }
-
-      // Setup The Session
-      var sp = getSpotifyApi();
-      var models = sp.require('$api/models');
-      var views = sp.require("$api/views");
-      var rt = new RockTumblerSession();
-
-      function setupDroppedPlaylist(drop) {
-        rt.init(drop.uri);
-        rt.setupPlaylists();
-      }
-
-      // Detonation Buttons
-      var detonateThisButton = document.getElementById('detonate-this');
-      detonateThisButton.addEventListener('click', detonateThis);
-
-      var detonateAllButton = document.getElementById('detonate-all');
-      detonateAllButton.addEventListener('click', detonateAll);
-
-      function detonateThis() {
-        localStorage.removeItem(rt.orig_playlist.data.uri);
-      }
-      function detonateAll() {
-        localStorage.clear();
-      }
-
-      // LZW-compress a string
-      function lzw_encode(s) {
-        var dict = {};
-        var data = (s + "").split("");
-        var out = [];
-        var currChar;
-        var phrase = data[0];
-        var code = 256;
-        for (var i=1; i<data.length; i++) {
-          currChar=data[i];
-          if (dict[phrase + currChar] != null) {
-            phrase += currChar;
-          }
-          else {
-            out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
-            dict[phrase + currChar] = code;
-            code++;
-            phrase=currChar;
-          }
-        }
-        out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
-        for (var i=0; i<out.length; i++) {
-          out[i] = String.fromCharCode(out[i]);
-        }
-        return out.join("");
-      }
-
-      // Decompress an LZW-encoded string
-      function lzw_decode(s) {
-        var dict = {};
-        var data = (s + "").split("");
-        var currChar = data[0];
-        var oldPhrase = currChar;
-        var out = [currChar];
-        var code = 256;
-        var phrase;
-        for (var i=1; i<data.length; i++) {
-          var currCode = data[i].charCodeAt(0);
-          if (currCode < 256) {
-            phrase = data[i];
-          }
-          else {
-            phrase = dict[currCode] ? dict[currCode] : (oldPhrase + currChar);
-          }
-          out.push(phrase);
-          currChar = phrase.charAt(0);
-          dict[code] = oldPhrase + currChar;
-          code++;
-          oldPhrase = phrase;
-        }
-        return out.join("");
-      }
-      function maxLocalStorage() {
-        localStorage.setItem("DATA", "m");
-        for(i=0 ; i<40 ; i++) {
-          var data = localStorage.getItem("DATA");
-          try { 
-            localStorage.setItem("DATA", data + data);
-          } catch(e) {
-            log("LIMIT REACHED: (" + i + ")");
-            log(e);
-          }
-        }
-      }
-
-      $(document).ready(function() {
-        $('#stars').prop('checked', true);
-        $('#autoplay').prop('checked', true);
-        $('#help').change(function() {
-          if ($(this).is(':checked')) {
-            $('body').chardinJs('start');
-          } else {
-            $('body').chardinJs('stop');
-          }
-        });
-        $('body').on('chardinJs:stop', function() {
-          $('#help').prop('checked', false);
-        });
-      });
-      </script>
     </div>
   </div>
+</div>
+<script src="/js/jquery-2.0.0.min.js"></script>
+<script src="/js/lazy.min.js"></script>
+<script src="/js/lazy.dom.min.js"></script>
+<script src="/js/lodash.min.js"></script>
+<script src="/js/log.js"></script>
+<script src="/js/mousetrap.min.js"></script>
+<script src="/js/chardinjs.min.js"></script>
+<script id="worker" type="javascript/worker">
+  var msg;
+  self.onmessage = function(event) {
+    if (event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
+      msg = "initial";
+    } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
+      msg = "play";
+    } else if (event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
+      msg = "ended";
+    } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
+      msg = "previous";
+    } else if (!event.data.curcontext && !event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
+      msg = "next";
+    } else if (!event.data.curcontext && event.data.contextclear && event.data.curtrack && event.data.playstate && !event.data.shuffle && !event.data.volume && !event.data.repeat) {
+      msg = "jumped";
+    } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && event.data.shuffle && !event.data.volume && !event.data.repeat) {
+      msg = "shuffle";
+    } else if (!event.data.curcontext && !event.data.contextclear && !event.data.curtrack && !event.data.playstate && !event.data.shuffle && !event.data.volume && event.data.repeat) {
+      msg = "repeat";
+    }
+    self.postMessage(msg);
+  }
+</script>
+<script>
+  // Session Object
+function RockTumblerSession() {
+  var _this = this,i,t,to_remove,track_uri;
+
+  this.ui = new RockTumblerUI();
+  this.ui.setupDropbox();
+
+  this.player = models.player;
+  this.player.shuffle = false;
+  this.start_track = null;
+
+  var blob = new Blob([document.querySelector('#worker').textContent]);
+  this.worker = new Worker(window.URL.createObjectURL(blob));
+
+  this.worker.onmessage = function(e) {
+    _this.respond[e.data]();
+  }
+
+  this.init = function(drop) {
+    _this.orig_playlist = models.Playlist.fromURI(drop);
+    _this.playlist = new models.Playlist();
+    _this.played_list = new models.Playlist();
+    _this.track_array = [];
+    _this.played_tracks_array = [];
+    _this.local_storage = getLocalStorage();
+    _this.r = new RandomizerArray(_this.orig_playlist.length);
+    _this.nextAgent = new timeoutHandler(600);
+    _this.changeAgent = new timeoutHandler(500);
+    _this.initialPlay = false;
+    bindKeys();
+  }
+
+  this.setupPlaylists = function() {
+    var track,track_uri,stars;
+    disableShuffle();
+    disableRepeat();
+    _this.expireObservers();
+
+    _this.local_storage = getLocalStorage();
+
+    if ($('#stars').is(':checked')) {
+      stars = "stars";
+    } else {
+      stars = "no_stars";
+    }
+
+    iterateThroughOrigPlaylist(stars);
+
+    if (_this.track_array.length == 0) {
+      if (stars == "no_stars") {
+        $('#stars').prop('checked', true);
+        stars = "stars";
+      }
+      _this.local_storage = getLocalStorage();
+      _this.track_array = _this.played_tracks_array = [];
+      _this.playlist = new models.Playlist();
+      _this.played_list = new models.Playlist();            
+      iterateThroughOrigPlaylist(stars);
+    }
+    _this.start_length = _this.track_array.length;
+
+    initializeObservers();
+
+    _this.ui.init(_this);
+    _this.ui.placeHTML();
+    _this.start_track = _this.playlist.get(0);
+
+    setTimeout(function() { 
+      if ($('#autoplay').is(':checked')) {
+        setContextAndPlay();
+      } else {
+        setContextButDoNotPlay();
+      }
+    },500);
+  }
+
+  function iterateThroughOrigPlaylist(stars) {
+    Lazy(_this.r.result).each(function(index){
+      track = _this.orig_playlist.get(index);
+      track_uri = track.data.uri;
+      if (Lazy(_this.local_storage).contains(track_uri.replace("spotify:track:","")) && !Lazy(_this.played_tracks_array).contains(track_uri)) { 
+        addTrackToPlayedList(track_uri);  
+      } else {
+        if (!Lazy(_this.track_array).contains(track_uri)) {
+          _this.starAction[stars](track);
+        }
+      }
+    });
+  }
+
+  this.expireObservers = function() {
+    _this.orig_playlist.ignore(models.EVENT.ITEMS_REMOVED);
+    _this.orig_playlist.ignore(models.EVENT.ITEMS_ADDED);
+    _this.playlist.ignore(models.EVENT.CHANGE);
+    _this.played_list.ignore(models.EVENT.CHANGE);
+    _this.player.ignore(models.EVENT.CHANGE);
+  }
+
+  this.expireTrack = function(track) {
+    _this.local_storage.push(track.replace("spotify:track:",""));
+    localStorage[_this.orig_playlist.data.uri] = lzw_encode(_this.local_storage);
+    _this.playlist.remove(track);
+    _this.played_list.add(track);
+    _this.played_tracks_array.push(track);
+  }
+
+  this.checkExpiration = function() {
+    var index = _this.playlist.indexOf(rt.player.track);
+    if (index > 0) {
+      to_remove = _this.track_array.splice(0,index);
+      Lazy(to_remove).each(function(track){_this.expireTrack(track);});
+    }
+  }
+
+  this.ended = function() {
+    _this.nextAgent.clearTimer();
+    to_remove = _this.track_array.splice(0,_this.playlist.length);
+    Lazy(to_remove).each(function(track){_this.expireTrack(track);});
+    _this.ui.completedMessage();
+  }
+
+  this.moveCurrentTrackToHead = function() {
+    i = _this.playlist.indexOf(_this.player.track.data.uri);
+    t = _this.track_array.splice(i,1);
+    _this.track_array.unshift(Lazy(t).first());
+    _this.playlist.data.move(_this.player.track.data.uri,0);
+    if (_this.track_array.length != _this.start_length) {
+      _this.expireTrack(_this.playlist.get(1).uri);
+      _this.track_array.splice(1,1);
+    }
+  }
+
+  this.respond = {
+    initial: function() {
+      if (!$('#autoplay').is(':checked') && !_this.initialPlay) {
+        _this.player.playing = false;
+        _this.initialPlay = true;
+      }
+    },
+    play: function() {},
+    next: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
+    previous: function() { _this.nextAgent.setTimer(function(){_this.checkExpiration()}); },
+    ended: function() { _this.ended(); },
+    jumped: function() { if (_this.playlist.indexOf(_this.player.track) != 0) { _this.moveCurrentTrackToHead(); } },
+    shuffle: function() { disableShuffle(); },
+    repeat: function() { disableRepeat(); }
+  }  
+
+  this.starAction = {
+    stars: function(track) {addTrackToPlaylist(track.data.uri);},
+    no_stars: function(track) {
+      if (track.starred) {
+        addTrackToPlayedList(track.data.uri);
+      } else {
+        addTrackToPlaylist(track.data.uri);
+      }
+    }
+  }
+
+  function getLocalStorage() {
+    if (localStorage[_this.orig_playlist.name] && (!localStorage[_this.orig_playlist.data.uri] || localStorage[_this.orig_playlist.data.uri].split(",").length == 0)) { 
+      localStorage[_this.orig_playlist.data.uri] = localStorage[_this.orig_playlist.name];
+      localStorage.removeItem(_this.orig_playlist.name);
+    }
+
+    try {
+      if (_this.local_storage.length==_this.orig_playlist.length) {
+        localStorage.removeItem(_this.orig_playlist.data.uri);
+      }
+    } catch(err) {
+    }
+
+    return localStorage[_this.orig_playlist.data.uri] && localStorage[_this.orig_playlist.data.uri].split(",").length > 0 ? lzw_decode(localStorage[_this.orig_playlist.data.uri]).split(",") : [];
+  }
+
+  function disableShuffle() {
+    _this.player.shuffle = false;
+  }
+
+  function disableRepeat() {
+    _this.player.repeat = false;
+  }
+
+  function RandomizerArray(length) {
+    this.length = length;
+    this.result = Lazy.range(this.length).shuffle();
+  }
+
+  function bindKeys() {
+    Mousetrap.bind('mod+shift+s', function(e) {
+      _this.player.track.starred = !_this.player.track.starred;
+      return false;
+    });
+  }
+
+  function initializeObservers() {
+    _this.orig_playlist.observe(models.EVENT.ITEMS_REMOVED, function(event) {
+      _this.changeAgent.setTimer(function(){checkForRemovedTracks()});
+    });
+
+    _this.orig_playlist.observe(models.EVENT.ITEMS_ADDED, function(event) {
+      _this.changeAgent.setTimer(function(){checkForAddedTracks()});
+    });
+
+    _this.playlist.observe(models.EVENT.CHANGE, function(event) {
+      _this.ui.updatePlaylistMeta();
+    });
+
+    _this.played_list.observe(models.EVENT.CHANGE, function(event) {
+      _this.ui.updatePlaylistMeta();
+    });
+
+    _this.player.observe(models.EVENT.CHANGE, function(event) {
+      _this.worker.postMessage(_(event.data).pairs().object().value());
+    });
+  }
+
+  function checkForRemovedTracks() {
+    var in_playlist,i;
+    Lazy(diffBetweenPlaylists(_this.playlist,_this.orig_playlist,_this.played_list)).each(function(track){
+      if (_this.player.track.data.uri == track) {
+        _this.player.playing = false;
+        removeTrackFromPlaylist(track);
+        _this.start_track = _this.playlist.get(0);
+        setContextAndPlay();
+      } else {  
+        removeTrackFromPlaylist(track);  
+      }         
+    });
+    Lazy(diffBetweenPlaylists(_this.played_list,_this.orig_playlist,_this.playlist)).each(function(track){
+      removeTrackFromPlayedList(track);
+    });
+  }
+
+  function checkForAddedTracks() {
+    Lazy(diffBetweenPlaylists(_this.orig_playlist,_this.playlist,_this.played_list)).each(function(track){
+      addTrackToPlaylist(track);
+    });
+  }
+
+  function removeTrackFromPlaylist(track) {
+    _this.playlist.remove(track);
+    i = Lazy(_this.track_array).indexOf(track);
+    _this.track_array.splice(i,1);
+  }
+
+  function removeTrackFromPlayedList(track) {
+    _this.played_list.remove(track);
+    i = Lazy(_this.played_tracks_array).indexOf(track);
+    _this.played_tracks_array.splice(i,1);
+  }
+
+  function addTrackToPlaylist(track) {
+    _this.playlist.add(track);
+    _this.track_array.push(track);
+  }
+
+  function addTrackToPlayedList(track) {
+    _this.played_list.add(track);
+    _this.played_tracks_array.push(track);
+  }
+
+  function diffBetweenPlaylists(main,comp1,comp2) {
+    main = _.map(main.tracks,function(track){return track.data.uri});
+    comp1 = _.map(comp1.tracks,function(track){return track.data.uri}) || [];
+    comp2 = _.map(comp2.tracks,function(track){return track.data.uri}) || [];
+    return Lazy(main).difference(comp1).difference(comp2).toArray();
+  }
+
+  function setContextAndPlay() {
+    _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
+  }
+
+  function setContextButDoNotPlay() {
+    _this.player.playTrackWithContext(_this.start_track,_this.playlist,0);
+    _this.player.playing = false;
+  }
+}
+
+// UI Handler
+function RockTumblerUI() {
+  var _this = this,hours,minutes,seconds;
+
+  this.playlist_HTML = document.getElementById('original-tracks-list');
+  this.played_list_HTML = document.getElementById('played-tracks-list');
+  this.player_HTML = document.getElementById('player');
+
+  this.init = function(rt) {
+    _this.session = rt;
+    _this.playlist = new views.List(_this.session.playlist);
+    _this.played_list = new views.List(_this.session.played_list);
+    _this.playlist.track = _this.played_list.track = null;
+    _this.player = new views.Player();
+    setContext();
+  }
+
+  this.placeHTML = function() {
+    _this.playlist_HTML.innerHTML = _this.played_list_HTML.innerHTML = _this.player_HTML.innerHTML = '';
+    _this.playlist_HTML.innerHTML = "<p id='playlist_meta'><strong>Playlist:</strong> " + _this.session.playlist.length + " Tracks | " + calculateDuration(_this.session.playlist.data.getDuration()) + "</p>";
+    _this.played_list_HTML.innerHTML = "<p id='played_list_meta'><strong>Played List:</strong>" + _this.session.played_list.length + " Tracks | " + calculateDuration(_this.session.played_list.data.getDuration()) + "</p>";
+    _this.playlist_meta = document.getElementById('playlist_meta');
+    _this.played_list_meta = document.getElementById('played_list_meta');
+    _this.playlist_HTML.appendChild(_this.playlist.node);
+    _this.played_list_HTML.appendChild(_this.played_list.node);
+    _this.player_HTML.appendChild(_this.player.node);
+  }
+
+  this.updatePlaylistMeta = function() {
+    _this.playlist_meta.innerHTML = "<strong>Playlist:</strong> " + _this.session.playlist.length + " Tracks | " + calculateDuration(_this.session.playlist.data.getDuration());
+    _this.played_list_meta.innerHTML = "<strong>Played List:</strong> " + _this.session.played_list.length + " Tracks | " + calculateDuration(_this.session.played_list.data.getDuration());
+  }
+
+  this.completedMessage = function() {
+    _this.playlist_HTML.innerHTML = "<p>You've just completed your entire playlist. Just drop another one in the box above to keep listening.</p><p>Thanks for using Rock Tumbler!</p><p>Sincerely,<br>The Management</p>"
+  }
+
+  this.setupDropbox = function() {
+    var drop_box = document.querySelector('#drop_box');
+    var instructions = document.getElementById("instructions");
+    var drop_list = document.getElementById("drop-list");
+    var success_message;
+
+    drop_box.addEventListener('dragstart', function(e){
+      e.dataTransfer.setData('text/html', this.innerHTML);
+      e.dataTransfer.effectAllowed = 'copy';
+    }, false);
+
+    drop_box.addEventListener('dragenter', function(e){
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      this.classList.add('over');
+    }, false);
+
+    drop_box.addEventListener('dragover', function(e){
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      return false;
+    }, false);
+
+    drop_box.addEventListener('dragleave', function(e){
+      e.preventDefault();
+      this.classList.remove('over');
+    }, false);
+
+    drop_box.addEventListener('drop', function(e){
+      e.preventDefault(); 
+      var drop = models.Playlist.fromURI(e.dataTransfer.getData('text'));
+      this.classList.remove('over');
+      instructions.innerHTML = 'Dropped Playlists:';
+      success_message = document.createElement('li');
+      success_message.className = 'playlist-entry';
+      success_message.innerHTML = drop.name;
+      drop_list.appendChild(success_message);
+      setupDroppedPlaylist(drop);
+    }, false);
+  }
+
+  function calculateDuration(d) {
+    d = Number(d);
+    var h = Math.floor(d / 3600);
+    var m = Math.floor(d % 3600 / 60);
+    var s = Math.floor(d % 3600 % 60);
+    return ((h > 0 ? h + ":" : "") + (m > 0 ? (h > 0 && m < 10 ? "0" : "") + m + ":" : "0:") + (s < 10 ? "0" : "") + s);
+  }
+
+  function setContext() {
+    _this.player.context = _this.playlist.context = _this.session.playlist;
+    _this.played_list.context = _this.session.played_list;
+  }
+}
+
+function timeoutHandler(timeout) {
+  var _this = this,count,to_remove,eventTimeoutId;
+
+  this.indexCounter = 0;
+  this.timeoutThreshold = timeout;
+
+  this.setTimer = function(callback) {
+    clearTimeout(eventTimeoutId);
+    eventTimeoutId = setTimeout(function() { onTimeout(callback) }, _this.timeoutThreshold);
+  }
+
+  this.clearTimer = function() {
+    clearTimeout(eventTimeoutId);
+  }
+
+  function onTimeout(callback) {
+    callback.call();
+  }
+}
+
+// Setup The Session
+var sp = getSpotifyApi();
+var models = sp.require('$api/models');
+var views = sp.require("$api/views");
+var rt = new RockTumblerSession();
+
+function setupDroppedPlaylist(drop) {
+  rt.init(drop.uri);
+  rt.setupPlaylists();
+}
+
+// Detonation Buttons
+var detonateThisButton = document.getElementById('detonate-this');
+detonateThisButton.addEventListener('click', detonateThis);
+
+var detonateAllButton = document.getElementById('detonate-all');
+detonateAllButton.addEventListener('click', detonateAll);
+
+function detonateThis() {
+  localStorage.removeItem(rt.orig_playlist.data.uri);
+}
+function detonateAll() {
+  localStorage.clear();
+}
+
+// LZW-compress a string
+function lzw_encode(s) {
+  var dict = {};
+  var data = (s + "").split("");
+  var out = [];
+  var currChar;
+  var phrase = data[0];
+  var code = 256;
+  for (var i=1; i<data.length; i++) {
+    currChar=data[i];
+    if (dict[phrase + currChar] != null) {
+      phrase += currChar;
+    }
+    else {
+      out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+      dict[phrase + currChar] = code;
+      code++;
+      phrase=currChar;
+    }
+  }
+  out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+  for (var i=0; i<out.length; i++) {
+    out[i] = String.fromCharCode(out[i]);
+  }
+  return out.join("");
+}
+
+// Decompress an LZW-encoded string
+function lzw_decode(s) {
+  var dict = {};
+  var data = (s + "").split("");
+  var currChar = data[0];
+  var oldPhrase = currChar;
+  var out = [currChar];
+  var code = 256;
+  var phrase;
+  for (var i=1; i<data.length; i++) {
+    var currCode = data[i].charCodeAt(0);
+    if (currCode < 256) {
+      phrase = data[i];
+    }
+    else {
+      phrase = dict[currCode] ? dict[currCode] : (oldPhrase + currChar);
+    }
+    out.push(phrase);
+    currChar = phrase.charAt(0);
+    dict[code] = oldPhrase + currChar;
+    code++;
+    oldPhrase = phrase;
+  }
+  return out.join("");
+}
+function maxLocalStorage() {
+  localStorage.setItem("DATA", "m");
+  for(i=0 ; i<40 ; i++) {
+    var data = localStorage.getItem("DATA");
+    try { 
+      localStorage.setItem("DATA", data + data);
+    } catch(e) {
+      log("LIMIT REACHED: (" + i + ")");
+      log(e);
+    }
+  }
+}
+
+$(document).ready(function() {
+  $('#stars').prop('checked', true);
+  $('#autoplay').prop('checked', true);
+  $('#help').change(function() {
+    if ($(this).is(':checked')) {
+      $('body').chardinJs('start');
+    } else {
+      $('body').chardinJs('stop');
+    }
+  });
+  $('body').on('chardinJs:stop', function() {
+    $('#help').prop('checked', false);
+  });
+});
+</script>
 </body>
         </html>
