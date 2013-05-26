@@ -10,7 +10,7 @@
 	},
 	"BundleIdentifier": "rock-tumbler",
 	"BundleType": "Application",
-	"BundleVersion": "0.1",
+	"BundleVersion": "0.7.1",
 	"DefaultTabs": [
 	],
 	"Dependencies": {
@@ -23,5 +23,5 @@
 	"SupportedLanguages": [
 		"en"
 	],
-	"VendorIdentifier": "co.theablefew"
+	"VendorIdentifier": "com.theablefew"
 }
