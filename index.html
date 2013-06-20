@@ -581,21 +581,25 @@ function RockTumblerSession() {
       return Number(!albumsWithMoreThanOneTrack.contains(track.data.album.uri)).toString() + Number(!artistsWithMoreThanOneTrack.contains(track.data.artists[0].uri)).toString() + Number(track.data.popularity < trackPopularityAvg.mean).toString() + Number(!track.data.starred).toString() + Number(!lazyUser.contains(track)).toString() + Number(track.data.trackNumber <= 2 || (track.data.trackNumber >= 5 && track.data.trackNumber <= 7)).toString() + Number(!lazyUS.contains(track)).toString() + Number(!lazyGlobal.contains(track)).toString() + Number(track.data.duration <= trackDurationAvg.mean).toString();
     }).map(function(track) { 
       m = parseInt(track,2); 
-      return (0.25*(m*m))+(2*m)+playableTracks.length(); 
+      return Math.floor((0.25*(m*m))+(2*m)+playableTracks.length()); 
     });
 
-    var sum = fitnesses.uniq().sum();
+    fitnessMatrix = fitnesses.uniq().sortBy(function(f) {return f;}).reverse();
 
-    var fitnessMatrix = fitnesses.uniq();
+    var sum = fitnessMatrix.sum();
+
+    var rouletteWheel = fitnessMatrix.collect(function(f){ return Lazy.range(Math.round(((f/sum)*100))).collect(function() { return f; }).toArray(); }).flatten().toArray();
 
     var fitnessedTracks = {};
    
     fitnessMatrix.each(function(fitness) { fitnessedTracks[fitness] = Lazy(_.zip(playableTracks.toArray(),fitnesses.toArray())).collect(function(track){ return track[1] == fitness ? track[0] : false; }).compact().shuffle().toArray()});
 
-    log(fitnessedTracks);
+    var previouslyChosen = [];
+
+    var sortedTracks = Lazy.generate(function() { return rouletteWheel[_.random(rouletteWheel.length - 1)]; }).collect(function(f) { track = fitnessedTracks[f].pop(); if (fitnessedTracks[f].length == 0) { rw = Lazy(rouletteWheel).filter(function(fitness) { return fitness != f; } ).toArray(); rouletteWheel = rw; } return track; } ).compact().take(playableTracks.length());
 
     if (playableTracks.length() > 0) {
-      playableTracks.shuffle().each(function(track) {addTrackToPlaylist(track.data.uri);});
+      sortedTracks.each(function(track) {addTrackToPlaylist(track.data.uri);});
     }
     playedTracks.each(function(track) {addTrackToPlayedList(track.data.uri);});
   }
