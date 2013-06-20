@@ -491,18 +491,14 @@ function RockTumblerSession() {
 
     _this.local_storage = getLocalStorage();
 
-    if ($('#stars').is(':checked')) {
-      stars = "stars";
-    } else {
-      stars = "no_stars";
-    }
+    var stars = $('#stars').is(':checked');
 
     iterateThroughOrigPlaylist(stars);
 
     if (_this.track_array.length == 0) {
-      if (stars == "no_stars") {
+      if (!stars) {
         $('#stars').prop('checked', true);
-        stars = "stars";
+        stars = !stars;
       }
       _this.local_storage = getLocalStorage();
       _this.track_array = _this.played_tracks_array = [];
@@ -528,17 +524,21 @@ function RockTumblerSession() {
   }
 
   function iterateThroughOrigPlaylist(stars) {
-    Lazy(_this.r.result).each(function(index){
-      track = _this.orig_playlist.get(index);
-      track_uri = track.data.uri;
-      if (Lazy(_this.local_storage).contains(track_uri.replace("spotify:track:","")) && !Lazy(_this.played_tracks_array).contains(track_uri)) { 
-        addTrackToPlayedList(track_uri);  
-      } else {
-        if (!Lazy(_this.track_array).contains(track_uri)) {
-          _this.starAction[stars](track);
-        }
-      }
-    });
+    var tracks = _this.orig_playlist.tracks;
+    var lazyTracks = Lazy(tracks);
+    var lazyStorage = Lazy(_this.local_storage);
+
+    var playableTracks = lazyTracks.select(function(track) { return !lazyStorage.contains(track.data.uri.replace("spotify:track:","")) && _this.starFilter[stars](track.data.starred) && !Lazy(_this.played_tracks_array).contains(track.data.uri); });
+
+    var playedTracks = lazyTracks.difference(playableTracks.toArray());
+
+    playableTracks.shuffle().each(function(track) {addTrackToPlaylist(track.data.uri);});
+    playedTracks.each(function(track) {addTrackToPlayedList(track.data.uri);});
+  }
+
+  this.starFilter = { 
+    true: function(starred) { return true; }, 
+    false: function(starred) { return starred ? false : true; }
   }
 
   this.expireObservers = function() {
