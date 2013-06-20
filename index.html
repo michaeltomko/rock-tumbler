@@ -471,7 +471,7 @@ function RockTumblerSession() {
     toplist.matchType = models.TOPLISTMATCHES.TRACKS;
     toplist.region = "US";
     toplist.run();
-    _this.USToplist = Lazy(toplist.results);
+    _this.USToplist = toplist;
   }
 
   function generateGlobalToplist() {
@@ -480,7 +480,7 @@ function RockTumblerSession() {
     toplist.matchType = models.TOPLISTMATCHES.TRACKS;
     toplist.region = models.TOPLISTREGION_EVERYWHERE;
     toplist.run();
-    _this.GlobalToplist = Lazy(toplist.results);
+    _this.GlobalToplist = toplist;
   }
 
   function generateUserToplist() {
@@ -489,7 +489,7 @@ function RockTumblerSession() {
     toplist.matchType = models.TOPLISTMATCHES.TRACKS;
     toplist.userName = models.TOPLISTUSER_CURRENT;
     toplist.run();
-    _this.UserToplist = Lazy(toplist.results); 
+    _this.UserToplist = toplist; 
   }
 
   var blob = new Blob([document.querySelector('#worker').textContent]);
@@ -555,6 +555,7 @@ function RockTumblerSession() {
 
   function iterateThroughOrigPlaylist(stars) {
     var tracks = _this.orig_playlist.tracks;
+    var artists = [], popularities = [], albums = [], trackNumbers = [];
     var lazyTracks = Lazy(tracks);
     var lazyStorage = Lazy(_this.local_storage);
 
@@ -562,13 +563,15 @@ function RockTumblerSession() {
 
     var playedTracks = lazyTracks.difference(playableTracks.toArray());
 
-    playableTracks.shuffle().each(function(track) {addTrackToPlaylist(track.data.uri);});
+    if (playableTracks.length() > 0) {
+      playableTracks.shuffle().each(function(track) {addTrackToPlaylist(track.data.uri);});
+    }
     playedTracks.each(function(track) {addTrackToPlayedList(track.data.uri);});
   }
 
   this.starFilter = { 
     true: function(starred) { return true; }, 
-    false: function(starred) { return starred ? false : true; }
+    false: function(starred) { return !starred; }
   }
 
   this.expireObservers = function() {
