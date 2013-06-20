@@ -557,12 +557,14 @@ function RockTumblerSession() {
     var tracks = _this.orig_playlist.tracks;
 
     var artists = [], albums = [], trackDurations = [], trackPopularities = [];
-    var lazyGlobal = Lazy(_this.GlobalToplist.results), lazyUS = Lazy(_this.USToplist.results), lazyUser = Lazy(_this.UserToplist.results);
-
+    var GlobalToplist = {}, USToplist = {}, UserToplist = {};
+    
+    Lazy(_this.GlobalToplist.results).each(function(track) { GlobalToplist[track.data.uri] = true; });
+    Lazy(_this.USToplist.results).each(function(track) { USToplist[track.data.uri] = true; });
+    Lazy(_this.UserToplist.results).each(function(track) { UserToplist[track.data.uri] = true; });
+    
     var lazyTracks = Lazy(tracks);
     var lazyStorage = Lazy(_this.local_storage);
-
-    var fitnesses = [];
 
     var playableTracks = lazyTracks.select(function(track) {
       albums.push(track.data.album.uri);
@@ -576,12 +578,14 @@ function RockTumblerSession() {
 
     var trackDurationAvg = _this.average(trackDurations), trackPopularityAvg = _this.average(trackPopularities);
 
-    var artistsWithMoreThanOneTrack = lazyTracks.countBy(function(track) {return track.data.artists[0].uri;}).collect(function(arr) { return arr[1] > 1 ? arr[0] : false; }).flatten().compact();
-    var albumsWithMoreThanOneTrack = lazyTracks.countBy(function(track) {return track.data.album.uri;}).collect(function(arr) { return arr[1] > 1 ? arr[0] : false; }).flatten().compact();
+    var artistsWithMoreThanOneTrack = {}, albumsWithMoreThanOneTrack = {};
+      
+    Lazy(artists).countBy(function(artist) {return artist; }).each(function(artist) { artistsWithMoreThanOneTrack[artist[0]] = artist[1] > 1; });
+    Lazy(albums).countBy(function(album) {return album; }).each(function(album) { albumsWithMoreThanOneTrack[album[0]] = album[1] > 1; });
 
     var fitnesses = playableTracks.map(function(track) {
-      return Number(!albumsWithMoreThanOneTrack.contains(track.data.album.uri)).toString() + Number(!artistsWithMoreThanOneTrack.contains(track.data.artists[0].uri)).toString() + Number(track.data.popularity < trackPopularityAvg.mean).toString() + Number(!track.data.starred).toString() + Number(!lazyUser.contains(track)).toString() + Number(track.data.trackNumber <= 2 || (track.data.trackNumber >= 5 && track.data.trackNumber <= 7)).toString() + Number(!lazyUS.contains(track)).toString() + Number(!lazyGlobal.contains(track)).toString() + Number(track.data.duration <= trackDurationAvg.mean).toString();
-    }).map(function(track) { m = parseInt(track,2); return Math.floor((0.25*(m*m))+(2*m)+playableTracks.length()); }).take(100);
+      return Number(!albumsWithMoreThanOneTrack[track.data.album.uri]).toString() + Number(!artistsWithMoreThanOneTrack[track.data.artists[0].uri]).toString() + Number(track.data.popularity < trackPopularityAvg.mean).toString() + Number(!track.data.starred).toString() + Number(!UserToplist[track.data.uri]).toString() + Number(track.data.trackNumber <= 2 || (track.data.trackNumber >= 5 && track.data.trackNumber <= 7)).toString() + Number(!USToplist[track.data.uri]).toString() + Number(!GlobalToplist[track.data.uri]).toString() + Number(track.data.duration <= trackDurationAvg.mean).toString();
+    }).map(function(track) { m = parseInt(track,2); return Math.floor((0.25*(m*m))+(2*m)+playableTracks.length()); });
 
     fitnessMatrix = fitnesses.uniq().sortBy(function(f) {return f;}).reverse();
 
