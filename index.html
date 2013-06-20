@@ -557,18 +557,42 @@ function RockTumblerSession() {
     var tracks = _this.orig_playlist.tracks;
 
     var artists = [], albums = [], trackDurations = [], trackPopularities = [];
+    var lazyGlobal = Lazy(_this.GlobalToplist.results), lazyUS = Lazy(_this.USToplist.results), lazyUser = Lazy(_this.UserToplist.results);
 
     var lazyTracks = Lazy(tracks);
     var lazyStorage = Lazy(_this.local_storage);
 
-    var playableTracks = lazyTracks.select(function(track) { albums.push(track.data.album.uri); albums.push(track.data.album.artist.uri); trackPopularities.push(track.data.popularity); trackDurations.push(track.data.duration); return !lazyStorage.contains(track.data.uri.replace("spotify:track:","")) && _this.starFilter[stars](track.data.starred) && !Lazy(_this.played_tracks_array).contains(track.data.uri); });
+    var playableTracks = lazyTracks.select(function(track) {
+      albums.push(track.data.album.uri);
+      artists.push(track.data.artists[0].uri);
+      trackPopularities.push(track.data.popularity); 
+      trackDurations.push(track.data.duration); 
+      return !lazyStorage.contains(track.data.uri.replace("spotify:track:","")) && _this.starFilter[stars](track.data.starred) && !Lazy(_this.played_tracks_array).contains(track.data.uri); 
+    });
+
+    var playedTracks = lazyTracks.difference(playableTracks.toArray());
 
     var trackDurationAvg = _this.average(trackDurations), trackPopularityAvg = _this.average(trackPopularities);
 
-    artists = Lazy(artists).countBy(function(artist) {return artist;}).toArray();
-    albums = Lazy(albums).countBy(function(album) {return album;}).toArray();
+    var artistsWithMoreThanOneTrack = lazyTracks.countBy(function(track) {return track.data.artists[0].uri;}).collect(function(arr) { return arr[1] > 1 ? arr[0] : false; }).flatten().compact();
+    var albumsWithMoreThanOneTrack = lazyTracks.countBy(function(track) {return track.data.album.uri;}).collect(function(arr) { return arr[1] > 1 ? arr[0] : false; }).flatten().compact();
 
-    var playedTracks = lazyTracks.difference(playableTracks.toArray());
+    var fitnesses = playableTracks.map(function(track) {
+      return Number(!albumsWithMoreThanOneTrack.contains(track.data.album.uri)).toString() + Number(!artistsWithMoreThanOneTrack.contains(track.data.artists[0].uri)).toString() + Number(track.data.popularity < trackPopularityAvg.mean).toString() + Number(!track.data.starred).toString() + Number(!lazyUser.contains(track)).toString() + Number(track.data.trackNumber <= 2 || (track.data.trackNumber >= 5 && track.data.trackNumber <= 7)).toString() + Number(!lazyUS.contains(track)).toString() + Number(!lazyGlobal.contains(track)).toString() + Number(track.data.duration <= trackDurationAvg.mean).toString();
+    }).map(function(track) { 
+      m = parseInt(track,2); 
+      return (0.25*(m*m))+(2*m)+playableTracks.length(); 
+    });
+
+    var sum = fitnesses.uniq().sum();
+
+    var fitnessMatrix = fitnesses.uniq();
+
+    var fitnessedTracks = {};
+   
+    fitnessMatrix.each(function(fitness) { fitnessedTracks[fitness] = Lazy(_.zip(playableTracks.toArray(),fitnesses.toArray())).collect(function(track){ return track[1] == fitness ? track[0] : false; }).compact().shuffle().toArray()});
+
+    log(fitnessedTracks);
 
     if (playableTracks.length() > 0) {
       playableTracks.shuffle().each(function(track) {addTrackToPlaylist(track.data.uri);});
