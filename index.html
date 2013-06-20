@@ -461,6 +461,36 @@ function RockTumblerSession() {
   this.player = models.player;
   this.player.shuffle = false;
   this.start_track = null;
+  generateUSToplist();
+  generateGlobalToplist();
+  generateUserToplist();
+
+  function generateUSToplist() {
+    toplist = new models.Toplist();
+    toplist.toplistType = models.TOPLISTTYPE.REGION;
+    toplist.matchType = models.TOPLISTMATCHES.TRACKS;
+    toplist.region = "US";
+    toplist.run();
+    _this.USToplist = Lazy(toplist.results);
+  }
+
+  function generateGlobalToplist() {
+    toplist = new models.Toplist();
+    toplist.toplistType = models.TOPLISTTYPE.REGION;
+    toplist.matchType = models.TOPLISTMATCHES.TRACKS;
+    toplist.region = models.TOPLISTREGION_EVERYWHERE;
+    toplist.run();
+    _this.GlobalToplist = Lazy(toplist.results);
+  }
+
+  function generateUserToplist() {
+    toplist = new models.Toplist();
+    toplist.toplistType = models.TOPLISTTYPE.USER;
+    toplist.matchType = models.TOPLISTMATCHES.TRACKS;
+    toplist.userName = models.TOPLISTUSER_CURRENT;
+    toplist.run();
+    _this.UserToplist = Lazy(toplist.results); 
+  }
 
   var blob = new Blob([document.querySelector('#worker').textContent]);
   this.worker = new Worker(window.URL.createObjectURL(blob));
