@@ -507,6 +507,10 @@ function RockTumblerSession() {
   }
 
   this.init = function(drop) {
+    _this.twoWeeksAgo = new Date();
+    _this.twoWeeksAgo.setDate(_this.twoWeeksAgo.getDate() - 14);
+    _this.oneWeekAgo = new Date();
+    _this.oneWeekAgo.setDate(_this.oneWeekAgo.getDate() - 7);
     _this.orig_playlist = models.Playlist.fromURI(drop);
     _this.playlist = new models.Playlist();
     _this.played_list = new models.Playlist();
@@ -562,32 +566,25 @@ function RockTumblerSession() {
   }
 
   function iterateThroughOrigPlaylist(stars) {
-    var artists = [], albums = [], trackDurations = [], trackPopularities = [];
+    var artists = [], albums = [];
 
     var lazyTracks = Lazy(_this.orig_playlist.tracks);
 
     var significantTrackNumbers = Lazy([1,2,5,6,7]);
     var averageSongLengthByDecade = {2020: 266000,2010: 266000,2000: 250000,1990: 254000,1980: 248000,1970: 235000,1960: 179000,1950: 156000,1940: 261000};
 
-    var oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
     var playableTracks = lazyTracks.select(function(track) {
       albums.push(track.data.album.uri);
       artists.push(track.data.artists[0].uri);
-      trackPopularities.push(track.data.popularity); 
-      trackDurations.push(track.data.duration); 
       return !_this.lazyStorage.contains(track.data.uri.replace("spotify:track:","")) && _this.starFilter[stars](track.data.starred) && !Lazy(_this.played_tracks_array).contains(track.data.uri); 
     });
 
-    var trackDurationAvg = _this.average(trackDurations), trackPopularityAvg = _this.average(trackPopularities);
+    var countedArtists = _.countBy(artists,function(artist){ return artist; });
+    var countedAlbums = _.countBy(albums,function(album){ return album; });
 
-    var artistsWithMoreThanOneTrack = {}, albumsWithMoreThanOneTrack = {};
-
-    Lazy(artists).countBy(function(artist) {return artist; }).each(function(artist) { artistsWithMoreThanOneTrack[artist[0]] = artist[1] > 1; });
-    Lazy(albums).countBy(function(album) {return album; }).each(function(album) { albumsWithMoreThanOneTrack[album[0]] = album[1] > 1; });
-
-    fitnesses = playableTracks.map(function(track){ var nearestDecade = (Math.round(track.data.album.year / 10) * 10); var b = parseInt(_this.toBinary[(_this.orig_playlist.data.getTrackAddTime(track) * 1000) > oneWeekAgo] + _this.toBinary[Boolean(!albumsWithMoreThanOneTrack[track.data.album.uri])] + _this.toBinary[Boolean(!artistsWithMoreThanOneTrack[track.data.artists[0].uri])] + _this.toBinary[track.data.popularity < trackPopularityAvg.mean] + _this.toBinary[((track.data.duration >= averageSongLengthByDecade[nearestDecade] - 30000) && (track.data.duration <= averageSongLengthByDecade + 30000))] + _this.toBinary[!track.data.starred] + _this.toBinary[!_this.UserToplist[track.data.uri]] + _this.toBinary[significantTrackNumbers.contains(track.data.trackNumber)] + _this.toBinary[!_this.USToplist[track.data.uri]] + _this.toBinary[!_this.GlobalToplist[track.data.uri]] + _this.toBinary[track.data.duration <= trackDurationAvg.mean],2) + "1"; return Math.floor((0.25*(b*b))+(2*b)+playableTracks.length());
+    fitnesses = playableTracks.map(function(track){ 
+      var nearestDecade = (Math.round(track.data.album.year / 10) * 10);
+      var b = parseInt(_this.toBinary[(_this.orig_playlist.data.getTrackAddTime(track) * 1000) > _this.oneWeekAgo] + _this.toBinary[(_this.orig_playlist.data.getTrackAddTime(track) * 1000) > _this.twoWeeksAgo] + _this.toBinary[countedArtists[track.data.artists[0].uri] <= 3] + _this.toBinary[track.data.popularity <= 25] + _this.toBinary[((track.data.duration >= averageSongLengthByDecade[nearestDecade] - 30000) && (track.data.duration <= averageSongLengthByDecade + 30000))] + _this.toBinary[significantTrackNumbers.contains(track.data.trackNumber)] + _this.toBinary[(track.data.popularity >= 26 && track.data.popularity <= 50)] + _this.toBinary[countedAlbums[track.data.album.uri] <= 3] + _this.toBinary[!track.data.starred] + _this.toBinary[!_this.UserToplist[track.data.uri]] + _this.toBinary[!_this.USToplist[track.data.uri]] + _this.toBinary[!_this.GlobalToplist[track.data.uri]] + _this.toBinary[track.data.popularity > 50] + "1",2); return Math.floor((0.25*(b*b))+(2*b)+playableTracks.length());
     });
 
     fitnessMatrix = fitnesses.uniq().sortBy(function(f) {return f;}).reverse();
