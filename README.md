@@ -1,3 +1,5 @@
+> Note: This project is now defunct as [Spotify is shuttering their app program](https://developer.spotify.com/news-stories/2014/03/24/closure-of-spotify-apps-submissions/).
+
 # Rock Tumbler 
 
 Rock Tumbler takes the pain out of listening to playlists in Spotify. Some might even say that it smoothes out the edges of rock.
